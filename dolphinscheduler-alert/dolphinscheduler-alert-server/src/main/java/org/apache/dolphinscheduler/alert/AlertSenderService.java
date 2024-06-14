@@ -106,6 +106,8 @@ public final class AlertSenderService extends Thread {
                     .title(alert.getTitle())
                     .warnType(alert.getWarningType().getCode())
                     .alertType(alert.getAlertType().getCode())
+                    .sdhTitle(alert.getSdhTitle())
+                    .sdhContent(alert.getSdhContent())
                     .build();
 
             int sendSuccessCount = 0;

@@ -23,18 +23,16 @@ import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.AlertDao;
-import org.apache.dolphinscheduler.dao.entity.Alert;
-import org.apache.dolphinscheduler.dao.entity.DqExecuteResult;
-import org.apache.dolphinscheduler.dao.entity.DqExecuteResultAlertContent;
-import org.apache.dolphinscheduler.dao.entity.ProcessAlertContent;
-import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
-import org.apache.dolphinscheduler.dao.entity.ProjectUser;
-import org.apache.dolphinscheduler.dao.entity.TaskAlertContent;
-import org.apache.dolphinscheduler.dao.entity.TaskInstance;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.AlertGroupMapper;
+import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionLogMapper;
+import org.apache.dolphinscheduler.dao.mapper.ProcessDefinitionMapper;
+import org.apache.dolphinscheduler.dao.mapper.UserMapper;
 import org.apache.dolphinscheduler.plugin.task.api.enums.dp.DqTaskState;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +40,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,7 +59,23 @@ public class ProcessAlertManager {
      */
     @Autowired
     private AlertDao alertDao;
+    @Autowired
+    private ProcessDefinitionLogMapper processDefinitionLogMapper;
 
+    @Autowired
+    private ProcessDefinitionMapper processDefinitionMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private AlertGroupMapper alertGroupMapper;
+
+    @Value("${sdh.platform.alert:true}")
+    private Boolean startSdhAlertFlag;
+
+    @Value("${sdh.platform.link}")
+    private String sdhPlatformLink;
     /**
      * command type convert chinese
      *
@@ -237,6 +252,34 @@ public class ProcessAlertManager {
         alert.setProcessInstanceId(processInstance.getId());
         alert.setAlertType(processInstance.getState().isSuccess() ? AlertType.PROCESS_INSTANCE_SUCCESS
                 : AlertType.PROCESS_INSTANCE_FAILURE);
+
+        if (startSdhAlertFlag) {
+            String eventDesc = "";
+            WarningType warningType = alert.getWarningType();
+            if(warningType == WarningType.SUCCESS){
+                eventDesc = "成功";
+            } else if (warningType == WarningType.FAILURE) {
+                eventDesc = "失败";
+            }
+            Integer alertGroupId = alert.getAlertGroupId();
+
+            AlertGroup alertGroup = alertGroupMapper.selectById(alertGroupId);
+            if (alertGroup == null) {
+                logger.error("sdh select alert group failed: {}", alertGroupId);
+            }
+
+            Long processDefinitionCode = alert.getProcessDefinitionCode();
+
+            ProcessDefinition processDefinition = processDefinitionMapper.queryByCode(processDefinitionCode);
+
+            String sdhTitle = MessageFormat.format("{0}告警", alertGroup.getGroupName());
+            String sdhContent = MessageFormat.format("您关注的{0}任务因{1}事件触发警告，请及时查看详细信息，平台登录入口如下：{2}",
+                    processDefinition.getName(),eventDesc, sdhPlatformLink);
+
+            alert.setSdhTitle(sdhTitle);
+            alert.setSdhContent(sdhContent);
+        }
+
         alertDao.addAlert(alert);
         logger.info("add alert to db , alert: {}", alert);
     }

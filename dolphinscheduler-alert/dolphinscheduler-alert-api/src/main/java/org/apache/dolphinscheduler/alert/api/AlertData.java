@@ -19,6 +19,7 @@
 
 package org.apache.dolphinscheduler.alert.api;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -65,5 +66,9 @@ public class AlertData {
      * AlertType#code
      */
     private int alertType;
+
+    private String sdhTitle;
+
+    private String sdhContent;
 
 }

@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.plugin.alert.email;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.alert.api.AlertChannel;
 import org.apache.dolphinscheduler.alert.api.AlertData;
 import org.apache.dolphinscheduler.alert.api.AlertInfo;
@@ -39,7 +40,15 @@ public final class EmailAlertChannel implements AlertChannel {
             return new AlertResult("false", "mail params is null");
         }
         MailSender mailSender = new MailSender(paramsMap);
-        AlertResult alertResult = mailSender.sendMails(alert.getTitle(), alert.getContent());
+//
+        String sdhTitle = alert.getSdhTitle();
+        String sdhContent = alert.getSdhContent();
+        AlertResult alertResult = null;
+        if (StringUtils.isNotBlank(sdhTitle) && StringUtils.isNotBlank(sdhContent)) {
+            alertResult = mailSender.sendMails(sdhTitle, sdhContent);
+        } else {
+            alertResult = mailSender.sendMails(alert.getTitle(), alert.getContent());
+        }
 
         boolean flag;
 

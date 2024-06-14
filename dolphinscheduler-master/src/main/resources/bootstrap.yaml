@@ -31,3 +31,4 @@ sdh:
   platform:
     alert: true
     link: http://192.168.1.240:8080/login
+

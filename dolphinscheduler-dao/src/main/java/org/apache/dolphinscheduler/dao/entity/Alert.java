@@ -49,11 +49,17 @@ public class Alert {
     @TableField(value = "title")
     private String title;
 
+    @TableField(value = "sdh_title")
+    private String sdhTitle;
+
     /**
      * content
      */
     @TableField(value = "content")
     private String content;
+
+    @TableField(value = "sdh_content")
+    private String sdhContent;
 
     /**
      * alert_status
@@ -238,6 +244,22 @@ public class Alert {
 
     public void setAlertType(AlertType alertType) {
         this.alertType = alertType;
+    }
+
+    public void setSdhTitle(String sdhTitle) {
+        this.sdhTitle = sdhTitle;
+    }
+
+    public void setSdhContent(String sdhContent) {
+        this.sdhContent = sdhContent;
+    }
+
+    public String getSdhTitle() {
+        return sdhTitle;
+    }
+
+    public String getSdhContent() {
+        return sdhContent;
     }
 
     @Override
