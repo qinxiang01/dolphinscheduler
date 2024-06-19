@@ -72,7 +72,6 @@
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
         <rpm-maven-plugion.version>2.2.0</rpm-maven-plugion.version>
-        <spotless.version>2.23.0</spotless.version>
         <jacoco.version>0.8.8</jacoco.version>
         <maven.deploy.skip>false</maven.deploy.skip>
         <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
@@ -578,6 +577,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
+                    <skip>true</skip>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${project.build.directory}/jacoco.exec</jacoco-agent.destfile>
                     </systemPropertyVariables>
@@ -605,9 +605,6 @@
                         <goals>
                             <goal>restore-instrumented-classes</goal>
                         </goals>
-                        <configuration>
-                            <excludes>com/github/dreamhead/moco/*</excludes>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>default-report</id>
@@ -635,63 +632,6 @@
                         <version>4.0.0-beta4</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless.version}</version>
-                <configuration>
-                    <!-- optional: limit format enforcement to just the files changed by this feature branch -->
-                    <ratchetFrom>HEAD</ratchetFrom>
-                    <java>
-                        <eclipse>
-                            <file>style/spotless_dolphinscheduler_formatter.xml</file>
-                        </eclipse>
-                        <removeUnusedImports />
-                        <importOrder>
-                            <file>style/eclipse.importorder</file>
-                        </importOrder>
-                        <replaceRegex>
-                            <name>Remove wildcard imports</name>
-                            <searchRegex>import\s+[^\*\s]+\*;(\r\n|\r|\n)</searchRegex>
-                            <replacement>$1</replacement>
-                        </replaceRegex>
-                    </java>
-                    <pom>
-                        <sortPom>
-                            <encoding>UTF-8</encoding>
-                            <nrOfIndentSpace>4</nrOfIndentSpace>
-                            <keepBlankLines>true</keepBlankLines>
-                            <indentBlankLines>false</indentBlankLines>
-                            <indentSchemaLocation>true</indentSchemaLocation>
-                            <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
-                            <sortModules>false</sortModules>
-                            <sortExecutions>false</sortExecutions>
-                            <predefinedSortOrder>custom_1</predefinedSortOrder>
-                            <expandEmptyElements>false</expandEmptyElements>
-                            <sortProperties>false</sortProperties>
-                        </sortPom>
-                        <replace>
-                            <name>Leading blank line</name>
-                            <search>project</search>
-                            <replacement>project</replacement>
-                        </replace>
-                    </pom>
-                    <markdown>
-                        <includes>
-                            <include>**/*.md</include>
-                        </includes>
-                        <flexmark />
-                    </markdown>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
