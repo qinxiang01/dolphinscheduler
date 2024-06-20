@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.dolphinscheduler.plugin.task.api.resource.ResourceContext;
 
 /**
  * to master/worker task transport
@@ -233,6 +234,10 @@ public class TaskExecutionContext implements Serializable {
      * k8s TaskExecutionContext
      */
     private K8sTaskExecutionContext k8sTaskExecutionContext;
+
+
+    private ResourceContext resourceContext;
+
     /**
      * resources full name and tenant code
      */

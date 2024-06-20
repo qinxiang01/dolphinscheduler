@@ -45,8 +45,10 @@ import { userSagemaker } from './use-sagemaker'
 import { useChunjun } from './use-chunjun'
 import { usePytorch } from './use-pytorch'
 import { useHiveCli } from './use-hive-cli'
+import { useJava } from './use-java'
 
 export default {
+  JAVA: useJava,
   SHELL: useShell,
   SUB_PROCESS: useSubProcess,
   PYTHON: usePython,
@@ -77,4 +79,5 @@ export default {
   FLINK_STREAM: useFlinkStream,
   PYTORCH: usePytorch,
   HIVECLI: useHiveCli
+
 }

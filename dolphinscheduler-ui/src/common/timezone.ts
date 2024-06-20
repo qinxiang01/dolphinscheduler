@@ -532,7 +532,7 @@ export const timezoneList = [
   'Mexico/General',
   'NZ',
   'NZ-CHAT',
-  'Navajo',
+  'jo',
   'PRC',
   'PST8PDT',
   'Pacific/Apia',

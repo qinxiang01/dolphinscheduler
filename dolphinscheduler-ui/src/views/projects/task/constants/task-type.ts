@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 export type TaskType =
+  | 'JAVA'
   | 'SHELL'
   | 'SUB_PROCESS'
   | 'PROCEDURE'
@@ -49,6 +50,9 @@ export type TaskType =
 export type TaskExecuteType = 'STREAM' | 'BATCH'
 
 export const TASK_TYPES_MAP = {
+  JAVA: {
+    alias: 'JAVA'
+  },
   SHELL: {
     alias: 'SHELL'
   },

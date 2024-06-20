@@ -106,7 +106,9 @@ interface ISwitchResult {
 }
 
 interface ISourceItem {
-  id: number
+  id?: number
+  resourceName: string
+  res?: string
 }
 
 interface ISqoopTargetData {
@@ -235,6 +237,9 @@ interface ITaskParams {
   resourceList?: ISourceItem[]
   mainJar?: ISourceItem
   localParams?: ILocalParam[]
+  runType?: string
+  jvmArgs?: string
+  isModulePath?: boolean
   rawScript?: string
   initScript?: string
   programType?: string

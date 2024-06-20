@@ -32,6 +32,7 @@
         <module>dolphinscheduler-task-datax</module>
         <module>dolphinscheduler-task-flink</module>
         <module>dolphinscheduler-task-http</module>
+        <module>dolphinscheduler-task-java</module>
         <module>dolphinscheduler-task-mr</module>
         <module>dolphinscheduler-task-python</module>
         <module>dolphinscheduler-task-spark</module>
