@@ -107,7 +107,7 @@ interface ISwitchResult {
 
 interface ISourceItem {
   id?: number
-  resourceName: string
+  resourceName?: string
   res?: string
 }
 
@@ -476,6 +476,7 @@ export {
   ModelType,
   SourceType,
   ISqoopSourceParams,
+  ISourceItem,
   ISqoopTargetParams,
   IDependTask,
   IDependentItem,

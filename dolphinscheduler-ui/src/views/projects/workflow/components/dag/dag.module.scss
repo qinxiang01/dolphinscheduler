@@ -101,6 +101,9 @@ $bgLight: #ffffff;
     height: 18px;
     background-size: 100% 100%;
     margin-right: 10px;
+    &.icon-java {
+      background-image: url('/images/task-icons/java.png');
+    }
     &.icon-shell {
       background-image: url('/images/task-icons/shell.png');
     }
@@ -193,6 +196,9 @@ $bgLight: #ffffff;
 
   &:hover {
     .sidebar-icon {
+      &.icon-java {
+        background-image: url('/images/task-icons/java_hover.png');
+      }
       &.icon-shell {
         background-image: url('/images/task-icons/shell_hover.png');
       }
