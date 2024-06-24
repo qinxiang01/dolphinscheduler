@@ -1984,3 +1984,13 @@ CREATE TABLE `t_ds_fav_task`
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8;
+
+
+-- ----------------------------
+-- 修改更新时间字段（需求来源：SDH V1.0 实现表数据增量同步）
+-- ----------------------------
+ALTER TABLE `t_ds_task_instance`
+    ADD COLUMN update_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE `t_ds_alert`
+    MODIFY COLUMN update_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
