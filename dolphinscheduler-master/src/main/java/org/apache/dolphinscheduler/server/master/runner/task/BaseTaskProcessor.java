@@ -70,6 +70,7 @@ import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceP
 import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.UdfFuncParameters;
 import org.apache.dolphinscheduler.plugin.task.api.utils.JdbcUrlParser;
 import org.apache.dolphinscheduler.plugin.task.api.utils.MapUtils;
+import org.apache.dolphinscheduler.plugin.task.java.JavaParameters;
 import org.apache.dolphinscheduler.server.master.builder.TaskExecutionContextBuilder;
 import org.apache.dolphinscheduler.server.master.config.MasterConfig;
 import org.apache.dolphinscheduler.service.bean.SpringApplicationContext;
@@ -404,7 +405,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
      * set data quality task relation
      *
      * @param dataQualityTaskExecutionContext dataQualityTaskExecutionContext
-     * @param taskInstance taskInstance
+     * @param taskInstance                    taskInstance
      */
     private void setDataQualityTaskRelation(DataQualityTaskExecutionContext dataQualityTaskExecutionContext,
                                             TaskInstance taskInstance, String tenantCode) {
@@ -441,8 +442,8 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
         dataQualityTaskExecutionContext.setHdfsPath(
                 PropertyUtils.getString(Constants.FS_DEFAULT_FS)
                         + PropertyUtils.getString(
-                                Constants.DATA_QUALITY_ERROR_OUTPUT_PATH,
-                                "/user/" + tenantCode + "/data_quality_error_data"));
+                        Constants.DATA_QUALITY_ERROR_OUTPUT_PATH,
+                        "/user/" + tenantCode + "/data_quality_error_data"));
 
         setSourceConfig(dataQualityTaskExecutionContext, config);
         setTargetConfig(dataQualityTaskExecutionContext, config);
@@ -454,6 +455,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
      * It is used to get comparison params, the param contains
      * comparison name、comparison table and execute sql.
      * When the type is fixed_value, params will be null.
+     *
      * @param dataQualityTaskExecutionContext
      * @param config
      * @param ruleInputEntryList
@@ -503,6 +505,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * The default datasource is used to get the dolphinscheduler datasource info,
      * and the info will be used in StatisticsValueConfig and WriterConfig
+     *
      * @return DataSource
      */
     public DataSource getDefaultDataSource() {
@@ -529,6 +532,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * The StatisticsValueWriterConfig will be used in DataQualityApplication that
      * writes the statistics value into dolphin scheduler datasource
+     *
      * @param dataQualityTaskExecutionContext
      */
     private void setStatisticsValueWriterConfig(DataQualityTaskExecutionContext dataQualityTaskExecutionContext) {
@@ -543,6 +547,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * The WriterConfig will be used in DataQualityApplication that
      * writes the data quality check result into dolphin scheduler datasource
+     *
      * @param dataQualityTaskExecutionContext
      */
     private void setWriterConfig(DataQualityTaskExecutionContext dataQualityTaskExecutionContext) {
@@ -557,6 +562,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * The TargetConfig will be used in DataQualityApplication that
      * get the data which be used to compare to src value
+     *
      * @param dataQualityTaskExecutionContext
      * @param config
      */
@@ -578,6 +584,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * The SourceConfig will be used in DataQualityApplication that
      * get the data which be used to get the statistics value
+     *
      * @param dataQualityTaskExecutionContext
      * @param config
      */
@@ -598,7 +605,7 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
     /**
      * whehter tenant is null
      *
-     * @param tenant tenant
+     * @param tenant       tenant
      * @param taskInstance taskInstance
      * @return result
      */
@@ -619,6 +626,9 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
                 .taskType(taskInstance.getTaskType()).taskParams(taskInstance.getTaskParams()).build());
         if (baseParam != null) {
             List<ResourceInfo> projectResourceFiles = baseParam.getResourceFilesList();
+            if (baseParam instanceof JavaParameters) {
+                projectResourceFiles.add(((JavaParameters) baseParam).getMainJar());
+            }
             if (CollectionUtils.isNotEmpty(projectResourceFiles)) {
 
                 // filter the resources that the resource id equals 0
@@ -648,8 +658,9 @@ public abstract class BaseTaskProcessor implements ITaskProcessor {
 
     /**
      * set k8s task relation
+     *
      * @param k8sTaskExecutionContext k8sTaskExecutionContext
-     * @param taskInstance taskInstance
+     * @param taskInstance            taskInstance
      */
     private void setK8sTaskRelation(K8sTaskExecutionContext k8sTaskExecutionContext, TaskInstance taskInstance) {
         K8sTaskParameters k8sTaskParameters =

@@ -43,7 +43,7 @@ export function formatParams(data: INodeData): {
         taskParams.jvmArgs = data.jvmArgs
         taskParams.isModulePath = data.isModulePath
         if (data.runType === 'JAR' && data.mainJar) {
-            taskParams.mainJar = {id: data.mainJar}
+            taskParams.mainJar = {id: data.mainJar, resourceName: data.name}
         }
     }
     if (

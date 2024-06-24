@@ -177,7 +177,7 @@ public class JavaTask extends AbstractTask {
      **/
     protected String buildJarCommand() {
         Map<String, String> resourceContext = taskRequest.getResources();
-        String mainJarName = resourceContext.get(javaParameters.getMainJar().getResourceName());
+        String mainJarName = javaParameters.getMainJar().getResourceName();
         StringBuilder builder = new StringBuilder();
         builder.append(getJavaCommandPath())
                 .append("java").append(" ")

@@ -64,7 +64,7 @@ export function useJavaTaskMainJar(model: { [field: string]: any }): IJsonItem {
       showPath: true,
       checkStrategy: 'child',
       placeholder: t('project.node.main_package_tips'),
-      keyField: 'fullName',
+      keyField: 'id',
       labelField: 'name'
     },
     validate: {
