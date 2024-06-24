@@ -18,7 +18,7 @@ spring:
   banner:
     charset: UTF-8
   jackson:
-    time-zone: UTC
+    time-zone: Asia/Shanghai
     date-format: "yyyy-MM-dd HH:mm:ss"
   cache:
     # default enable cache, you can disable by `type: none`
@@ -73,14 +73,14 @@ registry:
   type: zookeeper
   zookeeper:
     namespace: dolphinscheduler
-    connect-string: localhost:2181
+    connect-string: 192.168.1.215:2181
     retry-policy:
       base-sleep-time: 60ms
       max-sleep: 300ms
       max-retries: 5
     session-timeout: 30s
     connection-timeout: 9s
-    block-until-connected: 600ms
+    block-until-connected: 30000ms
     digest: ~
 
 master:
@@ -150,9 +150,9 @@ spring:
       on-profile: mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/dolphinscheduler
-    username: root
-    password: root
+    url: jdbc:mysql://192.168.1.211:3306/dolphin_scheduler?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: admin
+    password: admin@666999
   quartz:
     properties:
       org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
