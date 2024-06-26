@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.plugin.task.flink;
 
+import lombok.NonNull;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractYarnTask;
 import org.apache.dolphinscheduler.plugin.task.api.TaskConstants;
@@ -26,13 +27,18 @@ import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
 import org.apache.dolphinscheduler.plugin.task.api.parser.ParameterUtils;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
+import org.slf4j.Logger;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class FlinkTask extends AbstractYarnTask {
 
@@ -50,6 +56,8 @@ public class FlinkTask extends AbstractYarnTask {
      * rules for flink application ID
      */
     protected static final Pattern FLINK_APPLICATION_REGEX = Pattern.compile(TaskConstants.FLINK_APPLICATION_REGEX);
+
+    private static final Pattern FLINK_JOBID_REGEX = Pattern.compile(TaskConstants.FLINK_APPLICATION_REGEX);
 
     public FlinkTask(TaskExecutionContext taskExecutionContext) {
         super(taskExecutionContext);
@@ -100,7 +108,33 @@ public class FlinkTask extends AbstractYarnTask {
 
     @Override
     public List<String> getTaskJobId() {
-        return LogUtils.getFlinkJobId(taskRequest.getLogPath(), logger);
+        return getFlinkJobId(taskRequest.getLogPath(), logger);
+    }
+
+    public List<String> getFlinkJobId(@NonNull String logPath, Logger logger) {
+        File logFile = new File(logPath);
+        if (!logFile.exists() || !logFile.isFile()) {
+            return Collections.emptyList();
+        }
+        Set<String> taskJobIds = new HashSet<>();
+        try (Stream<String> stream = Files.lines(Paths.get(logPath))) {
+            stream.filter(line -> {
+                Matcher matcher = FLINK_JOBID_REGEX.matcher(line);
+                return matcher.find();
+            }).forEach(line -> {
+                Matcher matcher = FLINK_JOBID_REGEX.matcher(line);
+                if (matcher.find()) {
+                    String taskJobId = matcher.group();
+                    if (taskJobIds.add(taskJobId.replace("Job ID: ", ""))) {
+                        logger.info("Find taskJobId: {} from {}", taskJobId, logPath);
+                    }
+                }
+            });
+            return new ArrayList<>(taskJobIds);
+        } catch (IOException e) {
+            logger.error("Get taskJobId from log file error, logPath: {}", logPath, e);
+            return Collections.emptyList();
+        }
     }
 
     @Override
