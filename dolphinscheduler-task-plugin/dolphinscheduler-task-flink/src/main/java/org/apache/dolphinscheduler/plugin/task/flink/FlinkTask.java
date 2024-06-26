@@ -90,10 +90,10 @@ public class FlinkTask extends AbstractYarnTask {
 
     @Override
     public void setAppIds(String appIds) {
+
         List<String> taskJobId = getTaskJobId();
-        String flinkJobId = taskJobId.get(taskJobId.size() - 1);
         if (!ObjectUtils.isEmpty(taskJobId)) {
-            appIds = appIds + "==" + flinkJobId;
+            appIds = appIds + "==" +  String.join(TaskConstants.COMMA, taskJobId);
         }
         super.appIds = appIds;
     }
