@@ -20,11 +20,16 @@ package org.apache.dolphinscheduler.plugin.task.flink;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractYarnTask;
 import org.apache.dolphinscheduler.plugin.task.api.TaskConstants;
+import org.apache.dolphinscheduler.plugin.task.api.TaskException;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
 import org.apache.dolphinscheduler.plugin.task.api.parser.ParameterUtils;
+import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,6 +86,21 @@ public class FlinkTask extends AbstractYarnTask {
 
         logger.info("flink task command : {}", command);
         return command;
+    }
+
+    @Override
+    public void setAppIds(String appIds) {
+        List<String> taskJobId = getTaskJobId();
+        String flinkJobId = taskJobId.get(taskJobId.size() - 1);
+        if (!ObjectUtils.isEmpty(taskJobId)) {
+            appIds = appIds + "==" + flinkJobId;
+        }
+        super.appIds = appIds;
+    }
+
+    @Override
+    public List<String> getTaskJobId() {
+        return LogUtils.getFlinkJobId(taskRequest.getLogPath(), logger);
     }
 
     @Override

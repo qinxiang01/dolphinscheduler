@@ -21,6 +21,7 @@ import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
 import org.apache.dolphinscheduler.plugin.task.api.model.TaskResponse;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -102,12 +103,17 @@ public abstract class AbstractYarnTask extends AbstractRemoteTask {
 
     /**
      * get application ids
+     *
      * @return
      * @throws TaskException
      */
     @Override
     public List<String> getApplicationIds() throws TaskException {
         return LogUtils.getAppIdsFromLogFile(taskRequest.getLogPath(), logger);
+    }
+
+    public List<String> getTaskJobId() {
+        return new ArrayList<>();
     }
 
     /**

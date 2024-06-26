@@ -44,6 +44,7 @@ import org.slf4j.MDC;
 public class LogUtils {
 
     private static final Pattern APPLICATION_REGEX = Pattern.compile(TaskConstants.YARN_APPLICATION_REGEX);
+    private static final Pattern FLINK_JOBID_REGEX = Pattern.compile(TaskConstants.FLINK_APPLICATION_REGEX);
 
     public List<String> getAppIdsFromLogFile(@NonNull String logPath) {
         return getAppIdsFromLogFile(logPath, log);
@@ -61,6 +62,32 @@ public class LogUtils {
                 return matcher.find();
             }).forEach(line -> {
                 Matcher matcher = APPLICATION_REGEX.matcher(line);
+                if (matcher.find()) {
+                    String appId = matcher.group();
+                    if (appIds.add(appId)) {
+                        logger.info("Find appId: {} from {}", appId, logPath);
+                    }
+                }
+            });
+            return new ArrayList<>(appIds);
+        } catch (IOException e) {
+            logger.error("Get appId from log file erro, logPath: {}", logPath, e);
+            return Collections.emptyList();
+        }
+    }
+
+    public List<String> getFlinkJobId(@NonNull String logPath, Logger logger) {
+        File logFile = new File(logPath);
+        if (!logFile.exists() || !logFile.isFile()) {
+            return Collections.emptyList();
+        }
+        Set<String> appIds = new HashSet<>();
+        try (Stream<String> stream = Files.lines(Paths.get(logPath))) {
+            stream.filter(line -> {
+                Matcher matcher = FLINK_JOBID_REGEX.matcher(line);
+                return matcher.find();
+            }).forEach(line -> {
+                Matcher matcher = FLINK_JOBID_REGEX.matcher(line);
                 if (matcher.find()) {
                     String appId = matcher.group();
                     if (appIds.add(appId)) {
