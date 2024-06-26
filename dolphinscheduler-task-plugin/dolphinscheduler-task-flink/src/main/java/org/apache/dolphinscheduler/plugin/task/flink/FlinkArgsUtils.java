@@ -45,7 +45,7 @@ public class FlinkArgsUtils {
     private static final String FLINK_VERSION_AFTER_OR_EQUALS_1_12 = ">=1.12";
     private static final String FLINK_VERSION_AFTER_OR_EQUALS_1_13 = ">=1.13";
     /**
-     *  default flink deploy mode
+     * default flink deploy mode
      */
     public static final FlinkDeployMode DEFAULT_DEPLOY_MODE = FlinkDeployMode.CLUSTER;
 
@@ -66,6 +66,7 @@ public class FlinkArgsUtils {
 
     /**
      * build flink cancel command line
+     *
      * @param taskExecutionContext
      * @return
      */
@@ -79,6 +80,7 @@ public class FlinkArgsUtils {
 
     /**
      * build flink savepoint command line, the savepoint folder should be set in flink conf
+     *
      * @return
      */
     public static List<String> buildSavePointCommandLine(TaskExecutionContext taskExecutionContext) {
@@ -160,6 +162,10 @@ public class FlinkArgsUtils {
             if (StringUtils.isNotEmpty(queue)) {
                 initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_YARN_APPLICATION_QUEUE, queue));
             }
+
+            // 解决flink任务失败后，yarn对应的application不停止的问题
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_ATTACHED, false));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_SHUTDOWN_ON_ATTACHED_EXIT, true));
         }
 
         // parallelism.default
@@ -270,7 +276,7 @@ public class FlinkArgsUtils {
         ResourceInfo mainJar = flinkParameters.getMainJar();
         if (mainJar != null) {
             // -py
-            if(ProgramType.PYTHON == programType) {
+            if (ProgramType.PYTHON == programType) {
                 args.add(FlinkConstants.FLINK_PYTHON);
             }
             args.add(mainJar.getRes());
