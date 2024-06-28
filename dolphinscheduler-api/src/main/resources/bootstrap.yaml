@@ -26,3 +26,10 @@ spring:
       config:
         sources:
           - name: ${spring.application.name}
+    nacos:
+      config:
+        enabled: false
+      discovery:
+        server-addr: 192.168.1.211:8848
+        group: dev
+        namespace: dev

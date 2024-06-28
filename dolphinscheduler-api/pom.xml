@@ -222,6 +222,17 @@
             <groupId>com.ibm.db2</groupId>
             <artifactId>jcc</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <version>2021.0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <version>2021.0.4.0</version>
+        </dependency>
     </dependencies>
     <build>
         <testResources>
