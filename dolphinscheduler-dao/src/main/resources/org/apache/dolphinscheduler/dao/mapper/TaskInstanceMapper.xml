@@ -228,7 +228,7 @@
         from t_ds_task_instance instance
         left join t_ds_task_definition_log define on define.code=instance.task_code and define.version=instance.task_definition_version
         left join t_ds_process_task_relation_log relation_log on relation_log.post_task_code = define.code and relation_log.post_task_version = define.version
-        left join t_ds_process_definition process on process.code=relation.process_definition_code 
+        left join t_ds_process_definition process on process.code=relation_log.process_definition_code 
         where define.project_code = #{projectCode}
         <if test="startTime != null">
             and instance.start_time <![CDATA[ >=]]> #{startTime}
