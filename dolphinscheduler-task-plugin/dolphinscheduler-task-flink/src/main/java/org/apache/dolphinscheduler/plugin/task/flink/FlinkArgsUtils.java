@@ -26,6 +26,7 @@ import org.apache.dolphinscheduler.plugin.task.api.utils.ArgsUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,7 @@ public class FlinkArgsUtils {
             // 解决flink任务失败后，yarn对应的application不停止的问题
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_ATTACHED, false));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_SHUTDOWN_ON_ATTACHED_EXIT, true));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_YARN_LOG_CONFIG, getFlinkLogConfig()));
         }
 
         // parallelism.default
@@ -175,6 +177,12 @@ public class FlinkArgsUtils {
         }
 
         return initOptions;
+    }
+
+    private static String getFlinkLogConfig() {
+        String flinkHome = System.getenv("FLINK_HOME");
+        flinkHome = flinkHome.endsWith(File.separator) ? flinkHome : flinkHome + File.separator;
+        return flinkHome + "conf" + File.separator + "log4j.properties";
     }
 
     private static List<String> buildRunCommandLineForOthers(TaskExecutionContext taskExecutionContext, FlinkParameters flinkParameters) {

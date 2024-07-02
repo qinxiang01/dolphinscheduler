@@ -66,6 +66,7 @@ public class FlinkConstants {
     public static final String FLINK_FORMAT_EXECUTION_TARGET = "set execution.target=%s";
     public static final String FLINK_FORMAT_EXECUTION_ATTACHED = "set execution.attached=%s";
     public static final String FLINK_FORMAT_EXECUTION_SHUTDOWN_ON_ATTACHED_EXIT = "set execution.shutdown-on-attached-exit=%s";
+    public static final String FLINK_FORMAT_YARN_LOG_CONFIG = "set $internal.yarn.log-config-file=%s";
     public static final String FLINK_FORMAT_YARN_APPLICATION_NAME = "set yarn.application.name=%s";
     public static final String FLINK_FORMAT_YARN_APPLICATION_QUEUE = "set yarn.application.queue=%s";
     public static final String FLINK_FORMAT_JOBMANAGER_MEMORY_PROCESS_SIZE = "set jobmanager.memory.process.size=%s";
