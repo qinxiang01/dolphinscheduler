@@ -42,6 +42,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONTokener;
+import org.springframework.util.CollectionUtils;
 
 public class DefaultHTMLTemplate implements AlertTemplate {
 
@@ -81,6 +82,9 @@ public class DefaultHTMLTemplate implements AlertTemplate {
             boolean flag = true;
 
             String title = "";
+            if (CollectionUtils.isEmpty(mapItemsList)) {
+                return content;
+            }
             for (LinkedHashMap<String, Object> mapItems : mapItemsList) {
 
                 Set<Map.Entry<String, Object>> entries = mapItems.entrySet();
@@ -148,7 +152,7 @@ public class DefaultHTMLTemplate implements AlertTemplate {
     /**
      * get alert message from a html template
      *
-     * @param title message title
+     * @param title   message title
      * @param content message content
      * @return alert message which use html template
      */
