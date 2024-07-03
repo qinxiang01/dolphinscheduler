@@ -31,6 +31,7 @@ import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.TaskExecuteType;
 import org.apache.dolphinscheduler.common.utils.CollectionUtils;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Project;
 import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
@@ -92,17 +93,17 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
     /**
      * query task list by project, process instance, task name, task start time, task end time, task status, keyword paging
      *
-     * @param loginUser login user
-     * @param projectCode project code
+     * @param loginUser         login user
+     * @param projectCode       project code
      * @param processInstanceId process instance id
-     * @param searchVal search value
-     * @param taskName task name
-     * @param stateType state type
-     * @param host host
-     * @param startDate start time
-     * @param endDate end time
-     * @param pageNo page number
-     * @param pageSize page size
+     * @param searchVal         search value
+     * @param taskName          task name
+     * @param stateType         state type
+     * @param host              host
+     * @param startDate         start time
+     * @param endDate           end time
+     * @param pageNo            page number
+     * @param pageSize          page size
      * @return task list page
      */
     @Override
@@ -150,11 +151,11 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
         if (taskExecuteType == TaskExecuteType.STREAM) {
             // stream task without process instance
             taskInstanceIPage = taskInstanceMapper.queryStreamTaskInstanceListPaging(
-                page, project.getCode(), processDefinitionName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end
+                    page, project.getCode(), processDefinitionName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end
             );
         } else {
             taskInstanceIPage = taskInstanceMapper.queryTaskInstanceListPaging(
-                page, project.getCode(), processInstanceId, processInstanceName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end
+                    page, project.getCode(), processInstanceId, processInstanceName, searchVal, taskName, executorId, statusArray, host, taskExecuteType, start, end
             );
         }
         Set<String> exclusionSet = new HashSet<>();
@@ -182,8 +183,8 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
     /**
      * change one task instance's state from failure to forced success
      *
-     * @param loginUser login user
-     * @param projectCode project code
+     * @param loginUser      login user
+     * @param projectCode    project code
      * @param taskInstanceId task instance id
      * @return the result code and msg
      */
@@ -235,10 +236,10 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
 
         Project project = projectMapper.queryByCode(projectCode);
         //check user access for project
-        Map<String, Object> checkResult = projectService.checkProjectAndAuth(loginUser, project, projectCode,FORCED_SUCCESS);
+        Map<String, Object> checkResult = projectService.checkProjectAndAuth(loginUser, project, projectCode, FORCED_SUCCESS);
         Status status = (Status) checkResult.get(Constants.STATUS);
         if (status != Status.SUCCESS) {
-            putMsg(result,status);
+            putMsg(result, status);
             return result;
         }
 
@@ -248,7 +249,7 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
             return result;
         }
 
-        TaskSavePointRequestCommand command = new TaskSavePointRequestCommand(taskInstanceId);
+        TaskSavePointRequestCommand command = new TaskSavePointRequestCommand(taskInstanceId, JSONUtils.toJsonString(taskInstance));
 
         Host host = new Host(taskInstance.getHost());
         stateEventCallbackService.sendResult(host, command.convert2Command());
@@ -263,10 +264,10 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
 
         Project project = projectMapper.queryByCode(projectCode);
         //check user access for project
-        Map<String, Object> checkResult = projectService.checkProjectAndAuth(loginUser, project, projectCode,FORCED_SUCCESS);
+        Map<String, Object> checkResult = projectService.checkProjectAndAuth(loginUser, project, projectCode, FORCED_SUCCESS);
         Status status = (Status) checkResult.get(Constants.STATUS);
         if (status != Status.SUCCESS) {
-            putMsg(result,status);
+            putMsg(result, status);
             return result;
         }
 

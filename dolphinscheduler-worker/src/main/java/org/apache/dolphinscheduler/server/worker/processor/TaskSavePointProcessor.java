@@ -64,6 +64,11 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
      */
     @Autowired
     private WorkerManagerThread workerManager;
+    /**
+     * task execute manager
+     */
+    @Autowired
+    private TaskPluginManager taskPluginManager;
 
     /**
      * task save point process
@@ -83,15 +88,46 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         logger.info("Receive task savepoint command : {}", taskSavePointRequestCommand);
 
         int taskInstanceId = taskSavePointRequestCommand.getTaskInstanceId();
+        String taskInstanceDescription = taskSavePointRequestCommand.getTaskInstanceDescription();
+        TaskInstance taskInstance = JSONUtils.parseObject(taskInstanceDescription, TaskInstance.class);
+        TaskExecutionContext taskExecutionContext = getTaskExecutionContext(taskInstance);
+        TaskChannel taskChannel = taskPluginManager.getTaskChannelMap().get(taskExecutionContext.getTaskType());
+        if (null == taskChannel) {
+            throw new TaskPluginException(String.format("%s task plugin not found, please check config file.",
+                    taskExecutionContext.getTaskType()));
+        }
+        AbstractTask task = taskChannel.createTask(taskExecutionContext);
+
 
         try {
             LoggerUtils.setTaskInstanceIdMDC(taskInstanceId);
-            doSavePoint(taskInstanceId);
-
+            doSavePoint(task);
             sendTaskSavePointResponseCommand(channel, taskInstanceId);
         } finally {
             LoggerUtils.removeTaskInstanceIdMDC();
         }
+    }
+
+    public TaskExecutionContext getTaskExecutionContext(TaskInstance taskInstance) {
+        TaskExecutionContext taskExecutionContext = new TaskExecutionContext();
+        taskExecutionContext.setTaskInstanceId(taskInstance.getId());
+        taskExecutionContext.setTaskName(taskInstance.getName());
+        taskExecutionContext.setFirstSubmitTime(taskInstance.getFirstSubmitTime());
+        taskExecutionContext.setStartTime(taskInstance.getStartTime());
+        taskExecutionContext.setTaskType(taskInstance.getTaskType());
+        taskExecutionContext.setLogPath(taskInstance.getLogPath());
+        taskExecutionContext.setWorkerGroup(taskInstance.getWorkerGroup());
+        taskExecutionContext.setEnvironmentConfig(taskInstance.getEnvironmentConfig());
+        taskExecutionContext.setHost(taskInstance.getHost());
+        taskExecutionContext.setResources(taskInstance.getResources());
+        taskExecutionContext.setDelayTime(taskInstance.getDelayTime());
+        taskExecutionContext.setVarPool(taskInstance.getVarPool());
+        taskExecutionContext.setDryRun(taskInstance.getDryRun());
+        taskExecutionContext.setCurrentExecutionStatus(TaskExecutionStatus.SUBMITTED_SUCCESS);
+        taskExecutionContext.setCpuQuota(taskInstance.getCpuQuota());
+        taskExecutionContext.setMemoryMax(taskInstance.getMemoryMax());
+        taskExecutionContext.setAppIds(taskInstance.getAppLink());
+        return taskExecutionContext;
     }
 
     private void sendTaskSavePointResponseCommand(Channel channel, int taskInstanceId) {
@@ -108,17 +144,7 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         });
     }
 
-    protected void doSavePoint(int taskInstanceId) {
-        WorkerTaskExecuteRunnable workerTaskExecuteRunnable = workerManager.getTaskExecuteThread(taskInstanceId);
-        if (workerTaskExecuteRunnable == null) {
-            logger.warn("taskExecuteThread not found, taskInstanceId:{}", taskInstanceId);
-            return;
-        }
-        AbstractTask task = workerTaskExecuteRunnable.getTask();
-        if (task == null) {
-            logger.warn("task not found, taskInstanceId:{}", taskInstanceId);
-            return;
-        }
+    protected void doSavePoint(AbstractTask task) {
         if (!(task instanceof StreamTask)) {
             logger.warn("task is not stream task");
             return;

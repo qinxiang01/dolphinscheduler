@@ -26,7 +26,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- *  task savepoint request command
+ * task savepoint request command
  */
 @Data
 @NoArgsConstructor
@@ -34,12 +34,16 @@ import lombok.NoArgsConstructor;
 public class TaskSavePointRequestCommand implements Serializable {
 
     /**
-     *  task id
+     * task id
      */
     private int taskInstanceId;
+    /**
+     * task instance
+     */
+    private String taskInstanceDescription;
 
     /**
-     *  package request command
+     * package request command
      *
      * @return command
      */
