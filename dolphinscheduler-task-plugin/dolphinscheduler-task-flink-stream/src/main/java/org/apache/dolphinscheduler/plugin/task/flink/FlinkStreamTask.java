@@ -120,6 +120,7 @@ public class FlinkStreamTask extends FlinkTask implements StreamTask {
 
     @Override
     public void savePoint() throws Exception {
+        flinkParameters = JSONUtils.parseObject(taskExecutionContext.getTaskParams(), FlinkStreamParameters.class);
         List<String> appIds = getApplicationIds();
         if (CollectionUtils.isEmpty(appIds)) {
             logger.warn("can not get appId, taskInstanceId:{}", taskExecutionContext.getTaskInstanceId());
@@ -127,7 +128,7 @@ public class FlinkStreamTask extends FlinkTask implements StreamTask {
         }
 
         taskExecutionContext.setAppIds(String.join(TaskConstants.COMMA, appIds));
-        List<String> args = FlinkArgsUtils.buildSavePointCommandLine(taskExecutionContext);
+        List<String> args = FlinkArgsUtils.buildSavePointCommandLine(taskExecutionContext,flinkParameters);
         logger.info("savepoint args:{}", args);
 
         ProcessBuilder processBuilder = new ProcessBuilder();

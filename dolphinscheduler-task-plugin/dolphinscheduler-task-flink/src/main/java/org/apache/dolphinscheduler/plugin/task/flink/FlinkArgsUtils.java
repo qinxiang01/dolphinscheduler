@@ -84,11 +84,32 @@ public class FlinkArgsUtils {
      *
      * @return
      */
-    public static List<String> buildSavePointCommandLine(TaskExecutionContext taskExecutionContext) {
+    public static List<String> buildSavePointCommandLine(TaskExecutionContext taskExecutionContext, FlinkParameters flinkParameters) {
+        FlinkDeployMode deployMode = Optional.ofNullable(flinkParameters.getDeployMode()).orElse(FlinkDeployMode.CLUSTER);
+
+        String appIds = taskExecutionContext.getAppIds();
+        String[] split = appIds.split(FlinkConstants.FLINK_SPLIT_KEY);
+
         List<String> args = new ArrayList<>();
         args.add(FlinkConstants.FLINK_COMMAND);
-        args.add(FlinkConstants.FLINK_SAVEPOINT);
+        args.add(FlinkConstants.FLINK_STOP);
+        args.add(FlinkConstants.FLINK_STOP);
+        args.add(FlinkConstants.FLINK_SAVEPOINT_PATH);
         args.add(taskExecutionContext.getAppIds());
+        if (FlinkDeployMode.CLUSTER == deployMode) {
+            if (split.length != 2) {
+                throw new IllegalArgumentException("Invalid app ids " + appIds);
+            }
+            String yarnApplicationId = split[0];
+            String flinkJobId = split[1];
+            args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
+            args.add(flinkJobId);
+            args.add(FlinkConstants.FLIN_YARN_ID);
+            args.add(yarnApplicationId);
+        } else {
+            args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
+            args.add(split[0]);
+        }
         return args;
     }
 

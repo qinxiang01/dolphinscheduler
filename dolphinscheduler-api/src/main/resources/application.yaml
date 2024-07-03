@@ -40,8 +40,8 @@ spring:
   messages:
     basename: i18n/messages
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://127.0.0.1:5432/dolphinscheduler
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.1.218:3306/ds_319?serverTimezone=GMT%2B8&allowMultiQueries=true&characterEncoding=utf-8&useSSL=false&autoReconnect=true&rewriteBatchedStatements=true
     username: root
     password: root
     hikari:

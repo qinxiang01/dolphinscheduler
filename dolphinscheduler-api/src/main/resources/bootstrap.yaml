@@ -33,3 +33,7 @@ spring:
         server-addr: 192.168.1.211:8848
         group: dev
         namespace: dev
+
+sdh:
+  platform:
+    link: adf

@@ -29,6 +29,8 @@ public class FlinkConstants {
      */
     public static final String FLINK_COMMAND = "flink";
     public static final String FLINK_RUN = "run";
+    public static final String FLINK_STOP = "stop";
+
 
     /**
      * flink sql command
@@ -49,6 +51,7 @@ public class FlinkConstants {
     public static final String FLINK_YARN_SLOT = "-ys";
     public static final String FLINK_APP_NAME = "-ynm";
     public static final String FLINK_YARN_QUEUE_FOR_MODE = "-yqu";
+    public static final String FLIN_YARN_ID = "-yid";
     public static final String FLINK_YARN_QUEUE_FOR_TARGETS = "-Dyarn.application.queue";
     public static final String FLINK_TASK_MANAGE = "-yn";
     public static final String FLINK_JOB_MANAGE_MEM = "-yjm";
@@ -58,6 +61,7 @@ public class FlinkConstants {
     public static final String FLINK_SHUTDOWN_ON_ATTACHED_EXIT = "-sae";
     public static final String FLINK_PYTHON = "-py";
     public static final String FLINK_SAVEPOINT = "savepoint";
+    public static final String FLINK_SAVEPOINT_PATH = "--savepointPath";
     public static final String FLINK_METRICS = "metrics";
     public static final String FLINK_OVERVIEW = "overview";
     public static final String FLINK_JOBS = "jobs";
@@ -84,4 +88,10 @@ public class FlinkConstants {
     public static final String FLINK_SQL_SCRIPT_FILE = "-f";
     public static final String FLINK_SQL_INIT_FILE = "-i";
     public static final String FLINK_SQL_NEWLINE = ";\n";
+
+    public static final String FLINK_SAVEPOINT_DIR = "hdfs:///flink/savepoint/";
+    public static final String FLINK_CHECKPOINT_DIR = "hdfs:///flink/checkpoint/";
+
+
+    public static final String FLINK_SPLIT_KEY = "==";
 }
