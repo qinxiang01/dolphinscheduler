@@ -40,7 +40,9 @@ import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.RWXR_XR_
 
 public class FileUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
-    private FileUtils() {}
+
+    private FileUtils() {
+    }
 
     public static String getInitScriptFilePath(TaskExecutionContext taskExecutionContext) {
         return String.format("%s/%s_init.sql", taskExecutionContext.getExecutePath(), taskExecutionContext.getTaskAppId());
@@ -53,10 +55,11 @@ public class FileUtils {
     public static void generateScriptFile(TaskExecutionContext taskExecutionContext, FlinkParameters flinkParameters) {
         String initScriptFilePath = FileUtils.getInitScriptFilePath(taskExecutionContext);
         String scriptFilePath = FileUtils.getScriptFilePath(taskExecutionContext);
+
         String initOptionsString = StringUtils.join(
-                FlinkArgsUtils.buildInitOptionsForSql(flinkParameters),
+                FlinkArgsUtils.buildInitOptionsForSql(flinkParameters, taskExecutionContext.getTaskInstanceId()),
                 FlinkConstants.FLINK_SQL_NEWLINE
-            ).concat(FlinkConstants.FLINK_SQL_NEWLINE);
+        ).concat(FlinkConstants.FLINK_SQL_NEWLINE);
         writeScriptFile(initScriptFilePath, initOptionsString + flinkParameters.getInitScript());
         writeScriptFile(scriptFilePath, flinkParameters.getRawScript());
     }
@@ -98,7 +101,7 @@ public class FileUtils {
             LOGGER.info("Writing content: " + content);
             LOGGER.info("To file: " + file.getAbsolutePath());
             Files.write(file.getAbsoluteFile().toPath(), content.getBytes(StandardCharsets.UTF_8), standardOpenOption);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Error writing file: " + file.getAbsoluteFile(), e);
         }
     }

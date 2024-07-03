@@ -21,10 +21,16 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.plugin.task.api.AbstractTask;
-import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
-import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContextCacheManager;
+import org.apache.dolphinscheduler.dao.entity.TaskInstance;
+import org.apache.dolphinscheduler.dao.entity.Tenant;
+import org.apache.dolphinscheduler.plugin.task.api.*;
+import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
+import org.apache.dolphinscheduler.plugin.task.api.model.Property;
+import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
+import org.apache.dolphinscheduler.plugin.task.api.parameters.ParametersNode;
+import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
 import org.apache.dolphinscheduler.plugin.task.api.stream.StreamTask;
 import org.apache.dolphinscheduler.remote.command.Command;
 import org.apache.dolphinscheduler.remote.command.CommandType;
@@ -33,11 +39,17 @@ import org.apache.dolphinscheduler.remote.command.TaskSavePointResponseCommand;
 import org.apache.dolphinscheduler.remote.processor.NettyRequestProcessor;
 import org.apache.dolphinscheduler.server.worker.runner.WorkerManagerThread;
 import org.apache.dolphinscheduler.server.worker.runner.WorkerTaskExecuteRunnable;
+import org.apache.dolphinscheduler.service.task.TaskPluginManager;
 import org.apache.dolphinscheduler.service.utils.LoggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.TASK_TYPE_DATA_QUALITY;
+import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.TASK_TYPE_K8S;
 
 /**
  * task save point processor
@@ -62,7 +74,7 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
     @Override
     public void process(Channel channel, Command command) {
         Preconditions.checkArgument(CommandType.TASK_SAVEPOINT_REQUEST == command.getType(),
-                                    String.format("invalid command type : %s", command.getType()));
+                String.format("invalid command type : %s", command.getType()));
         TaskSavePointRequestCommand taskSavePointRequestCommand = JSONUtils.parseObject(command.getBody(), TaskSavePointRequestCommand.class);
         if (taskSavePointRequestCommand == null) {
             logger.error("task savepoint request command is null");
@@ -71,25 +83,20 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         logger.info("Receive task savepoint command : {}", taskSavePointRequestCommand);
 
         int taskInstanceId = taskSavePointRequestCommand.getTaskInstanceId();
-        TaskExecutionContext taskExecutionContext = TaskExecutionContextCacheManager.getByTaskInstanceId(taskInstanceId);
-        if (taskExecutionContext == null) {
-            logger.error("taskRequest cache is null, taskInstanceId: {}", taskSavePointRequestCommand.getTaskInstanceId());
-            return;
-        }
 
         try {
             LoggerUtils.setTaskInstanceIdMDC(taskInstanceId);
             doSavePoint(taskInstanceId);
 
-            sendTaskSavePointResponseCommand(channel, taskExecutionContext);
+            sendTaskSavePointResponseCommand(channel, taskInstanceId);
         } finally {
             LoggerUtils.removeTaskInstanceIdMDC();
         }
     }
 
-    private void sendTaskSavePointResponseCommand(Channel channel, TaskExecutionContext taskExecutionContext) {
+    private void sendTaskSavePointResponseCommand(Channel channel, int taskInstanceId) {
         TaskSavePointResponseCommand taskSavePointResponseCommand = new TaskSavePointResponseCommand();
-        taskSavePointResponseCommand.setTaskInstanceId(taskExecutionContext.getTaskInstanceId());
+        taskSavePointResponseCommand.setTaskInstanceId(taskInstanceId);
         channel.writeAndFlush(taskSavePointResponseCommand.convert2Command()).addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -117,7 +124,7 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
             return;
         }
         try {
-            ((StreamTask)task).savePoint();
+            ((StreamTask) task).savePoint();
         } catch (Exception e) {
             logger.error("task save point error", e);
         }

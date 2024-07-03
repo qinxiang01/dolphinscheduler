@@ -119,7 +119,7 @@ public class FlinkArgsUtils {
         return args;
     }
 
-    public static List<String> buildInitOptionsForSql(FlinkParameters flinkParameters) {
+    public static List<String> buildInitOptionsForSql(FlinkParameters flinkParameters, int taskInstanceId) {
         List<String> initOptions = new ArrayList<>();
 
         FlinkDeployMode deployMode = Optional.ofNullable(flinkParameters.getDeployMode()).orElse(FlinkDeployMode.CLUSTER);
@@ -167,7 +167,15 @@ public class FlinkArgsUtils {
             // 解决flink任务失败后，yarn对应的application不停止的问题
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_ATTACHED, false));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_SHUTDOWN_ON_ATTACHED_EXIT, true));
+            // 往yarn提交任务时，把日志框架配置同步到yarn的flink任务中
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_YARN_LOG_CONFIG, getFlinkLogConfig()));
+            // 设置checkpoint
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_INTERVAL, 60_000));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_TOLERABLE_FAILED_CHECKPOINTS, 10));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_NUM_RETAINED, 3));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_DIR, String.format("'hdfs:///flink/checkpoints/%d'", taskInstanceId)));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_CREATE_SUBDIR, true));
+
         }
 
         // parallelism.default
