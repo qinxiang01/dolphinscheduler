@@ -17,10 +17,15 @@
 
 package org.apache.dolphinscheduler.plugin.task.api;
 
+import org.apache.dolphinscheduler.common.utils.FileUtils;
 import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
 import org.apache.dolphinscheduler.plugin.task.api.model.TaskResponse;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -138,10 +143,14 @@ public abstract class AbstractYarnTask extends AbstractRemoteTask {
         if (null == mainJar) {
             throw new RuntimeException("The jar for the task is required.");
         }
-
         return mainJar.getId() == null
                 ? mainJar.getRes()
                 // when update resource maybe has error
                 : mainJar.getResourceName().replaceFirst("/", "");
+    }
+
+
+    public void runSavepoint(String command) throws IOException, InterruptedException {
+        shellCommandExecutor.runSavepoint(command);
     }
 }

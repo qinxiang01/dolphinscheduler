@@ -21,6 +21,7 @@ import static org.apache.dolphinscheduler.common.constants.Constants.FOLDER_SEPA
 import static org.apache.dolphinscheduler.plugin.task.java.JavaConstants.JAVA_HOME_VAR;
 import static org.apache.dolphinscheduler.plugin.task.java.JavaConstants.PUBLIC_CLASS_NAME_REGEX;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractTask;
 import org.apache.dolphinscheduler.plugin.task.api.ShellCommandExecutor;
@@ -185,8 +186,8 @@ public class JavaTask extends AbstractTask {
                 .append("-jar").append(" ")
                 .append(taskRequest.getExecutePath()).append(FOLDER_SEPARATOR)
                 .append(mainJarName).append(" ")
-                .append(javaParameters.getMainArgs().trim()).append(" ")
-                .append(javaParameters.getJvmArgs().trim());
+                .append(StringUtils.isNotBlank(javaParameters.getMainArgs()) ? javaParameters.getMainArgs().trim() : "").append(" ")
+                .append(StringUtils.isNotBlank(javaParameters.getJvmArgs()) ? javaParameters.getJvmArgs().trim() : "");
         return builder.toString();
     }
 

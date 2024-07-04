@@ -22,9 +22,11 @@ import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import org.springframework.util.ObjectUtils;
 
 @Data
 public class JavaParameters extends AbstractParameters {
@@ -81,6 +83,9 @@ public class JavaParameters extends AbstractParameters {
      **/
     @Override
     public List<ResourceInfo> getResourceFilesList() {
+        if (ObjectUtils.isEmpty(resourceList)) {
+            resourceList = new ArrayList<>();
+        }
         return this.resourceList;
     }
 }

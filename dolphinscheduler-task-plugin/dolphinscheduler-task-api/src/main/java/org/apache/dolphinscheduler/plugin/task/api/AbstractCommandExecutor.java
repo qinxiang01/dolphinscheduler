@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,7 +114,7 @@ public abstract class AbstractCommandExecutor {
      * @param commandFile command file
      * @throws IOException IO Exception
      */
-    private void buildProcess(String commandFile) throws IOException {
+    public void buildProcess(String commandFile) throws IOException {
         // setting up user to run commands
         List<String> command = new LinkedList<>();
 
@@ -149,6 +151,7 @@ public abstract class AbstractCommandExecutor {
     /**
      * generate systemd command.
      * eg: sudo systemd-run -q --scope -p CPUQuota=100% -p MemoryMax=200M --uid=root
+     *
      * @param command command
      */
     private void generateCgroupCommand(List<String> command) {
@@ -239,10 +242,28 @@ public abstract class AbstractCommandExecutor {
         int exitCode = process.exitValue();
         String exitLogMessage = EXIT_CODE_KILL == exitCode ? "process has killed." : "process has exited.";
         logger.info(exitLogMessage
-                + " execute path:{}, processId:{} ,exitStatusCode:{} ,processWaitForStatus:{} ,processExitValue:{}",
+                        + " execute path:{}, processId:{} ,exitStatusCode:{} ,processWaitForStatus:{} ,processExitValue:{}",
                 taskRequest.getExecutePath(), processId, result.getExitStatusCode(), status, exitCode);
         return result;
 
+    }
+
+    public void runSavepoint(String execCommand) throws IOException, InterruptedException {
+        String executePath = taskRequest.getExecutePath();
+        Files.createDirectories(Paths.get(executePath));
+        String path = buildCommandFilePath();
+
+        createCommandFileIfNotExists(execCommand, path);
+        buildProcess(path);
+
+        boolean status = process.waitFor(120, TimeUnit.SECONDS);
+        if (status) {
+            logger.info(" stop savepoint successfully ...");
+        } else {
+            logger.error("process has failure, the task timeout configuration value is:{}, ready to kill ...",
+                    taskRequest.getTaskTimeout());
+            ProcessUtils.kill(taskRequest);
+        }
     }
 
     public String getVarPool() {

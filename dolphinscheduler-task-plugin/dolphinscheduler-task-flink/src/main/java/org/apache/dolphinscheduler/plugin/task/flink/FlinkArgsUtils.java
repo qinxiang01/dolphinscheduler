@@ -93,21 +93,18 @@ public class FlinkArgsUtils {
         List<String> args = new ArrayList<>();
         args.add(FlinkConstants.FLINK_COMMAND);
         args.add(FlinkConstants.FLINK_STOP);
-        args.add(FlinkConstants.FLINK_STOP);
         args.add(FlinkConstants.FLINK_SAVEPOINT_PATH);
-        args.add(taskExecutionContext.getAppIds());
+        args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
         if (FlinkDeployMode.CLUSTER == deployMode) {
             if (split.length != 2) {
                 throw new IllegalArgumentException("Invalid app ids " + appIds);
             }
             String yarnApplicationId = split[0];
             String flinkJobId = split[1];
-            args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
             args.add(flinkJobId);
             args.add(FlinkConstants.FLIN_YARN_ID);
             args.add(yarnApplicationId);
         } else {
-            args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
             args.add(split[0]);
         }
         return args;

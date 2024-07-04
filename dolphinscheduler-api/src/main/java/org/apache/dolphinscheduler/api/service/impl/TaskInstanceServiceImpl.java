@@ -21,10 +21,7 @@ import static org.apache.dolphinscheduler.api.constants.ApiFuncIdentificationCon
 import static org.apache.dolphinscheduler.api.constants.ApiFuncIdentificationConstant.TASK_INSTANCE;
 
 import org.apache.dolphinscheduler.api.enums.Status;
-import org.apache.dolphinscheduler.api.service.ProcessInstanceService;
-import org.apache.dolphinscheduler.api.service.ProjectService;
-import org.apache.dolphinscheduler.api.service.TaskInstanceService;
-import org.apache.dolphinscheduler.api.service.UsersService;
+import org.apache.dolphinscheduler.api.service.*;
 import org.apache.dolphinscheduler.api.utils.PageInfo;
 import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.constants.Constants;
@@ -32,13 +29,8 @@ import org.apache.dolphinscheduler.common.enums.TaskExecuteType;
 import org.apache.dolphinscheduler.common.utils.CollectionUtils;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.dao.entity.Project;
-import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
-import org.apache.dolphinscheduler.dao.entity.TaskInstance;
-import org.apache.dolphinscheduler.dao.entity.User;
-import org.apache.dolphinscheduler.dao.mapper.ProjectMapper;
-import org.apache.dolphinscheduler.dao.mapper.TaskDefinitionMapper;
-import org.apache.dolphinscheduler.dao.mapper.TaskInstanceMapper;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.remote.command.TaskKillRequestCommand;
 import org.apache.dolphinscheduler.remote.command.TaskSavePointRequestCommand;
 import org.apache.dolphinscheduler.remote.processor.StateEventCallbackService;
@@ -46,11 +38,7 @@ import org.apache.dolphinscheduler.remote.utils.Host;
 import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
 import org.apache.dolphinscheduler.service.process.ProcessService;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +73,13 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
     UsersService usersService;
 
     @Autowired
+    TenantMapper tenantMapper;
+
+    @Autowired
     TaskDefinitionMapper taskDefinitionMapper;
+
+    @Autowired
+    TaskDefinitionLogMapper taskDefinitionLogMapper;
 
     @Autowired
     private StateEventCallbackService stateEventCallbackService;
@@ -248,8 +242,12 @@ public class TaskInstanceServiceImpl extends BaseServiceImpl implements TaskInst
             putMsg(result, Status.TASK_INSTANCE_NOT_FOUND);
             return result;
         }
-
-        TaskSavePointRequestCommand command = new TaskSavePointRequestCommand(taskInstanceId, JSONUtils.toJsonString(taskInstance));
+        Tenant tenant = tenantMapper.queryById(loginUser.getTenantId());
+        TaskDefinition taskDefinition = taskDefinitionLogMapper.queryByDefinitionCodeAndVersion(taskInstance.getTaskCode(), taskInstance.getTaskDefinitionVersion());
+        TaskSavePointRequestCommand command = new TaskSavePointRequestCommand(taskInstanceId, JSONUtils.toJsonString(taskInstance)
+                , taskDefinition.getTaskParams()
+                ,taskDefinition.getProjectCode()
+                ,tenant.getTenantCode());
 
         Host host = new Host(taskInstance.getHost());
         stateEventCallbackService.sendResult(host, command.convert2Command());

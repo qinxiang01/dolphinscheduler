@@ -21,16 +21,14 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.dolphinscheduler.common.utils.FileUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
-import org.apache.dolphinscheduler.dao.entity.Tenant;
-import org.apache.dolphinscheduler.plugin.task.api.*;
+import org.apache.dolphinscheduler.plugin.task.api.AbstractTask;
+import org.apache.dolphinscheduler.plugin.task.api.TaskChannel;
+import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
+import org.apache.dolphinscheduler.plugin.task.api.TaskPluginException;
 import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
-import org.apache.dolphinscheduler.plugin.task.api.model.Property;
-import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
-import org.apache.dolphinscheduler.plugin.task.api.parameters.ParametersNode;
-import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
 import org.apache.dolphinscheduler.plugin.task.api.stream.StreamTask;
 import org.apache.dolphinscheduler.remote.command.Command;
 import org.apache.dolphinscheduler.remote.command.CommandType;
@@ -38,18 +36,13 @@ import org.apache.dolphinscheduler.remote.command.TaskSavePointRequestCommand;
 import org.apache.dolphinscheduler.remote.command.TaskSavePointResponseCommand;
 import org.apache.dolphinscheduler.remote.processor.NettyRequestProcessor;
 import org.apache.dolphinscheduler.server.worker.runner.WorkerManagerThread;
-import org.apache.dolphinscheduler.server.worker.runner.WorkerTaskExecuteRunnable;
 import org.apache.dolphinscheduler.service.task.TaskPluginManager;
+import org.apache.dolphinscheduler.service.utils.CommonUtils;
 import org.apache.dolphinscheduler.service.utils.LoggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-
-import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.TASK_TYPE_DATA_QUALITY;
-import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.TASK_TYPE_K8S;
 
 /**
  * task save point processor
@@ -91,11 +84,26 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         String taskInstanceDescription = taskSavePointRequestCommand.getTaskInstanceDescription();
         TaskInstance taskInstance = JSONUtils.parseObject(taskInstanceDescription, TaskInstance.class);
         TaskExecutionContext taskExecutionContext = getTaskExecutionContext(taskInstance);
+        taskExecutionContext.setTaskParams(taskSavePointRequestCommand.getTaskParams());
+
+        String processExecDir = FileUtils.getProcessExecDir(
+                taskSavePointRequestCommand.getTenantCode(),
+                taskSavePointRequestCommand.getProjectCode(),
+                0,
+                0,
+                taskInstance.getProcessInstanceId(),
+                taskInstance.getId());
+        taskExecutionContext.setExecutePath(processExecDir);
+        taskExecutionContext.setTenantCode(taskSavePointRequestCommand.getTenantCode());
+        taskExecutionContext.setTaskAppId(String.format("%s_%s", taskExecutionContext.getProcessInstanceId(), taskExecutionContext.getTaskInstanceId()));
+
         TaskChannel taskChannel = taskPluginManager.getTaskChannelMap().get(taskExecutionContext.getTaskType());
         if (null == taskChannel) {
             throw new TaskPluginException(String.format("%s task plugin not found, please check config file.",
                     taskExecutionContext.getTaskType()));
         }
+        String systemEnvPath = CommonUtils.getSystemEnvPath();
+        taskExecutionContext.setEnvFile(systemEnvPath);
         AbstractTask task = taskChannel.createTask(taskExecutionContext);
 
 
@@ -127,6 +135,7 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         taskExecutionContext.setCpuQuota(taskInstance.getCpuQuota());
         taskExecutionContext.setMemoryMax(taskInstance.getMemoryMax());
         taskExecutionContext.setAppIds(taskInstance.getAppLink());
+        taskExecutionContext.setProcessId(taskInstance.getProcessInstanceId());
         return taskExecutionContext;
     }
 

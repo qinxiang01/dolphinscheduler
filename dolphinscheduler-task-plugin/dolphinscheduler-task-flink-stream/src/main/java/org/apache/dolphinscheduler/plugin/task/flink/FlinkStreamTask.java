@@ -17,6 +17,8 @@
 
 package org.apache.dolphinscheduler.plugin.task.flink;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.TaskConstants;
 import org.apache.dolphinscheduler.plugin.task.api.TaskException;
@@ -28,8 +30,15 @@ import org.apache.dolphinscheduler.plugin.task.api.stream.StreamTask;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class FlinkStreamTask extends FlinkTask implements StreamTask {
 
@@ -121,18 +130,9 @@ public class FlinkStreamTask extends FlinkTask implements StreamTask {
     @Override
     public void savePoint() throws Exception {
         flinkParameters = JSONUtils.parseObject(taskExecutionContext.getTaskParams(), FlinkStreamParameters.class);
-        List<String> appIds = getApplicationIds();
-        if (CollectionUtils.isEmpty(appIds)) {
-            logger.warn("can not get appId, taskInstanceId:{}", taskExecutionContext.getTaskInstanceId());
-            return;
-        }
-
-        taskExecutionContext.setAppIds(String.join(TaskConstants.COMMA, appIds));
-        List<String> args = FlinkArgsUtils.buildSavePointCommandLine(taskExecutionContext,flinkParameters);
+        List<String> args = FlinkArgsUtils.buildSavePointCommandLine(taskExecutionContext, flinkParameters);
         logger.info("savepoint args:{}", args);
-
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command(args);
-        processBuilder.start();
+        runSavepoint(String.join(" ", args));
     }
+
 }

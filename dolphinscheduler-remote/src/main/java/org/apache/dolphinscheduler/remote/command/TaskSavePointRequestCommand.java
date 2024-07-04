@@ -43,6 +43,15 @@ public class TaskSavePointRequestCommand implements Serializable {
     private String taskInstanceDescription;
 
     /**
+     * task definition params
+     */
+    private String taskParams;
+
+    private Long projectCode;
+
+    private String tenantCode;
+
+    /**
      * package request command
      *
      * @return command
