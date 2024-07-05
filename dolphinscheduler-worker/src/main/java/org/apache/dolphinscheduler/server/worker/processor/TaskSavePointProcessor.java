@@ -93,6 +93,8 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
                 0,
                 taskInstance.getProcessInstanceId(),
                 taskInstance.getId());
+        long taskCode = taskInstance.getTaskCode();
+        int taskDefinitionVersion = taskInstance.getTaskDefinitionVersion();
         taskExecutionContext.setExecutePath(processExecDir);
         taskExecutionContext.setTenantCode(taskSavePointRequestCommand.getTenantCode());
         taskExecutionContext.setTaskAppId(String.format("%s_%s", taskExecutionContext.getProcessInstanceId(), taskExecutionContext.getTaskInstanceId()));
@@ -136,6 +138,8 @@ public class TaskSavePointProcessor implements NettyRequestProcessor {
         taskExecutionContext.setMemoryMax(taskInstance.getMemoryMax());
         taskExecutionContext.setAppIds(taskInstance.getAppLink());
         taskExecutionContext.setProcessId(taskInstance.getProcessInstanceId());
+        taskExecutionContext.setTaskDefineCode(taskInstance.getTaskCode());
+        taskExecutionContext.setTaskDefineVersion(taskInstance.getTaskDefinitionVersion());
         return taskExecutionContext;
     }
 

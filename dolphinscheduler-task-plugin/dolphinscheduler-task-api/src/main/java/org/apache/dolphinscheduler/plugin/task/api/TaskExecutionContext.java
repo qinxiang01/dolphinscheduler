@@ -49,6 +49,16 @@ public class TaskExecutionContext implements Serializable {
     private int taskInstanceId;
 
     /**
+     * task code
+     */
+    private Long taskDefineCode;
+
+    /**
+     * task version
+     */
+    private int taskDefineVersion;
+
+    /**
      * task name
      */
     private String taskName;

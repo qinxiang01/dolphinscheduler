@@ -57,7 +57,7 @@ public class FileUtils {
         String scriptFilePath = FileUtils.getScriptFilePath(taskExecutionContext);
 
         String initOptionsString = StringUtils.join(
-                FlinkArgsUtils.buildInitOptionsForSql(flinkParameters, taskExecutionContext.getTaskInstanceId()),
+                FlinkArgsUtils.buildInitOptionsForSql(flinkParameters, taskExecutionContext),
                 FlinkConstants.FLINK_SQL_NEWLINE
         ).concat(FlinkConstants.FLINK_SQL_NEWLINE);
         writeScriptFile(initScriptFilePath, initOptionsString + flinkParameters.getInitScript());

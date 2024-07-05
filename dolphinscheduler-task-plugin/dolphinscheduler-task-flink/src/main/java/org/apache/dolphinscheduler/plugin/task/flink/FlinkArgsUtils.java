@@ -94,7 +94,7 @@ public class FlinkArgsUtils {
         args.add(FlinkConstants.FLINK_COMMAND);
         args.add(FlinkConstants.FLINK_STOP);
         args.add(FlinkConstants.FLINK_SAVEPOINT_PATH);
-        args.add(FlinkConstants.FLINK_SAVEPOINT_DIR + taskExecutionContext.getTaskInstanceId());
+        args.add(String.format(FlinkConstants.FLINK_SAVEPOINT_DIR, taskExecutionContext.getTaskDefineCode(), taskExecutionContext.getTaskDefineVersion()));
         if (FlinkDeployMode.CLUSTER == deployMode) {
             if (split.length != 2) {
                 throw new IllegalArgumentException("Invalid app ids " + appIds);
@@ -137,7 +137,7 @@ public class FlinkArgsUtils {
         return args;
     }
 
-    public static List<String> buildInitOptionsForSql(FlinkParameters flinkParameters, int taskInstanceId) {
+    public static List<String> buildInitOptionsForSql(FlinkParameters flinkParameters, TaskExecutionContext taskExecutionContext) {
         List<String> initOptions = new ArrayList<>();
 
         FlinkDeployMode deployMode = Optional.ofNullable(flinkParameters.getDeployMode()).orElse(FlinkDeployMode.CLUSTER);
@@ -191,7 +191,7 @@ public class FlinkArgsUtils {
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_INTERVAL, 60_000));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_TOLERABLE_FAILED_CHECKPOINTS, 10));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_NUM_RETAINED, 3));
-            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_DIR, String.format("'hdfs:///flink/checkpoints/%d'", taskInstanceId)));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_DIR, String.format(FlinkConstants.FLINK_CHECKPOINT_DIR, taskExecutionContext.getTaskDefineCode(), taskExecutionContext.getTaskDefineVersion())));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_CREATE_SUBDIR, true));
 
         }

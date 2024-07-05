@@ -69,6 +69,8 @@ public class TaskExecutionContextBuilder {
         taskExecutionContext.setCpuQuota(taskInstance.getCpuQuota());
         taskExecutionContext.setMemoryMax(taskInstance.getMemoryMax());
         taskExecutionContext.setAppIds(taskInstance.getAppLink());
+        taskExecutionContext.setTaskDefineVersion(taskInstance.getTaskDefinitionVersion());
+        taskExecutionContext.setTaskDefineCode(taskInstance.getTaskCode());
         return this;
     }
 

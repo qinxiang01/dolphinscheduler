@@ -89,8 +89,8 @@ public class FlinkConstants {
     public static final String FLINK_SQL_INIT_FILE = "-i";
     public static final String FLINK_SQL_NEWLINE = ";\n";
 
-    public static final String FLINK_SAVEPOINT_DIR = "hdfs:///flink/savepoint/";
-    public static final String FLINK_CHECKPOINT_DIR = "hdfs:///flink/checkpoint/";
+    public static final String FLINK_SAVEPOINT_DIR = "hdfs:///flink/savepoint/%s/%s";
+    public static final String FLINK_CHECKPOINT_DIR = "hdfs:///flink/checkpoint/%s/%s";
 
 
     public static final String FLINK_SPLIT_KEY = "==";
