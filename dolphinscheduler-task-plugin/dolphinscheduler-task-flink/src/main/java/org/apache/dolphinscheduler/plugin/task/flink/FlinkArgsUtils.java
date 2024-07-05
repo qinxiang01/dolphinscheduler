@@ -142,6 +142,11 @@ public class FlinkArgsUtils {
 
         FlinkDeployMode deployMode = Optional.ofNullable(flinkParameters.getDeployMode()).orElse(FlinkDeployMode.CLUSTER);
 
+        if (StringUtils.isBlank(flinkParameters.getSavepoint())) {
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getSavepoint()));
+        } else if (StringUtils.isBlank(flinkParameters.getCheckpoint())) {
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getCheckpoint()));
+        }
         /**
          * Currently flink sql on yarn only supports yarn-per-job mode
          */
@@ -191,9 +196,8 @@ public class FlinkArgsUtils {
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_INTERVAL, 60_000));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_EXECUTION_CHECKPOINTING_TOLERABLE_FAILED_CHECKPOINTS, 10));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_NUM_RETAINED, 3));
-            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_DIR, String.format(FlinkConstants.FLINK_CHECKPOINT_DIR, taskExecutionContext.getTaskDefineCode(), taskExecutionContext.getTaskDefineVersion())));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_DIR, String.format("'%s'", String.format(FlinkConstants.FLINK_CHECKPOINT_DIR, taskExecutionContext.getTaskDefineCode(), taskExecutionContext.getTaskDefineVersion()))));
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_STATE_CHECKPOINTS_CREATE_SUBDIR, true));
-
         }
 
         // parallelism.default

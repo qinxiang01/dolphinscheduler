@@ -123,18 +123,20 @@ public interface ExecutorService {
     /**
      * execute stream task instance
      *
-     * @param loginUser login user
-     * @param projectCode project code
-     * @param warningGroupId notify group id
-     * @param workerGroup worker group name
+     * @param loginUser       login user
+     * @param projectCode     project code
+     * @param warningGroupId  notify group id
+     * @param workerGroup     worker group name
      * @param environmentCode environment code
-     * @param startParams the global param values which pass to new process instance
+     * @param startParams     the global param values which pass to new process instance
+     * @param savepoint
+     * @param checkpoint
      * @return execute process instance code
      */
     Map<String, Object> execStreamTaskInstance(User loginUser, long projectCode,
-                                            long taskDefinitionCode, int taskDefinitionVersion,
-                                            int warningGroupId,
-                                            String workerGroup, Long environmentCode,
-                                            Map<String, String> startParams,
-                                            int dryRun);
+                                               long taskDefinitionCode, int taskDefinitionVersion,
+                                               int warningGroupId,
+                                               String workerGroup, Long environmentCode,
+                                               Map<String, String> startParams,
+                                               int dryRun, String savepoint, String checkpoint);
 }

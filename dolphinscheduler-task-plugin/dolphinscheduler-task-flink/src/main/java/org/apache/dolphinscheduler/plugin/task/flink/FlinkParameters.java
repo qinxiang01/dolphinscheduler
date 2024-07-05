@@ -58,6 +58,9 @@ public class FlinkParameters extends AbstractParameters {
      */
     private int parallelism;
 
+    private String checkpoint;
+    private String savepoint;
+
     /**
      * yarn application name
      */
@@ -248,6 +251,22 @@ public class FlinkParameters extends AbstractParameters {
 
     public void setRawScript(String rawScript) {
         this.rawScript = rawScript;
+    }
+
+    public String getCheckpoint() {
+        return checkpoint;
+    }
+
+    public void setCheckpoint(String checkpoint) {
+        this.checkpoint = checkpoint;
+    }
+
+    public String getSavepoint() {
+        return savepoint;
+    }
+
+    public void setSavepoint(String savepoint) {
+        this.savepoint = savepoint;
     }
 
     @Override

@@ -77,6 +77,7 @@ public class FlinkConstants {
     public static final String FLINK_FORMAT_TASKMANAGER_MEMORY_PROCESS_SIZE = "set taskmanager.memory.process.size=%s";
     public static final String FLINK_FORMAT_TASKMANAGER_NUMBEROFTASKSLOTS = "set taskmanager.numberOfTaskSlots=%d";
     public static final String FLINK_FORMAT_PARALLELISM_DEFAULT = "set parallelism.default=%d";
+    public static final String FLINK_FORMAT_RUN_SAVEPOINT = "execution.savepoint.path=%s";
 
     public static final String FLINK_FORMAT_EXECUTION_CHECKPOINTING_INTERVAL = "set execution.checkpointing.interval=%d";
     public static final String FLINK_FORMAT_EXECUTION_CHECKPOINTING_TOLERABLE_FAILED_CHECKPOINTS = "set execution.checkpointing.tolerable-failed-checkpoints=%d";
@@ -89,8 +90,8 @@ public class FlinkConstants {
     public static final String FLINK_SQL_INIT_FILE = "-i";
     public static final String FLINK_SQL_NEWLINE = ";\n";
 
-    public static final String FLINK_SAVEPOINT_DIR = "hdfs:///flink/savepoint/%s/%s";
-    public static final String FLINK_CHECKPOINT_DIR = "hdfs:///flink/checkpoint/%s/%s";
+    public static final String FLINK_SAVEPOINT_DIR = "hdfs:///dolphinscheduler/savepoints/%s/%s";
+    public static final String FLINK_CHECKPOINT_DIR = "hdfs:///dolphinscheduler/checkpoints/%s/%s";
 
 
     public static final String FLINK_SPLIT_KEY = "==";

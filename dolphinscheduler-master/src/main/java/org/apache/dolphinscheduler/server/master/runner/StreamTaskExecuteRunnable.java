@@ -19,10 +19,12 @@ package org.apache.dolphinscheduler.server.master.runner;
 
 import static org.apache.dolphinscheduler.common.constants.Constants.DEFAULT_WORKER_GROUP;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.dolphinscheduler.common.constants.Constants;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.Priority;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Environment;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.ProcessTaskRelation;
@@ -359,7 +361,15 @@ public class StreamTaskExecuteRunnable implements Runnable {
         taskExecutionContext.setProcessDefineVersion(processDefinition.getVersion());
         // process instance id default 0
         taskExecutionContext.setProcessInstanceId(0);
-
+        String savepoint = taskExecuteStartCommand.getSavepoint();
+        String checkpoint = taskExecuteStartCommand.getCheckpoint();
+        if (StringUtils.isNotBlank(savepoint) || StringUtils.isNotBlank(checkpoint)) {
+            String taskParams = taskExecutionContext.getTaskParams();
+            ObjectNode jsonNodes = JSONUtils.parseObject(taskParams);
+            jsonNodes.put("savepoint", savepoint);
+            jsonNodes.put("checkpoint", checkpoint);
+            taskExecutionContext.setTaskParams(jsonNodes.asText());
+        }
         return taskExecutionContext;
     }
 

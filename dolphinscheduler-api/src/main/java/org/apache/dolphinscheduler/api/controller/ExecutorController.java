@@ -421,7 +421,10 @@ public class ExecutorController extends BaseController {
                                           @RequestParam(value = "workerGroup", required = false, defaultValue = "default") String workerGroup,
                                           @RequestParam(value = "environmentCode", required = false, defaultValue = "-1") Long environmentCode,
                                           @RequestParam(value = "startParams", required = false) String startParams,
-                                          @RequestParam(value = "dryRun", defaultValue = "0", required = false) int dryRun) {
+                                          @RequestParam(value = "dryRun", defaultValue = "0", required = false) int dryRun,
+                                          @RequestParam(value = "savepoint", defaultValue = "", required = false) String savepoint,
+                                          @RequestParam(value = "checkpoint", defaultValue = "", required = false) String checkpoint
+    ) {
 
         Map<String, String> startParamMap = null;
         if (startParams != null) {
@@ -429,7 +432,7 @@ public class ExecutorController extends BaseController {
         }
 
         Map<String, Object> result = execService.execStreamTaskInstance(loginUser, projectCode, code, version,
-                warningGroupId, workerGroup, environmentCode, startParamMap, dryRun);
+                warningGroupId, workerGroup, environmentCode, startParamMap, dryRun,savepoint,checkpoint);
         return returnDataList(result);
     }
 }

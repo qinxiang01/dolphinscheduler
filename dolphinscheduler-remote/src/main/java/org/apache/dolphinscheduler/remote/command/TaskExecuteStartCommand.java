@@ -57,6 +57,9 @@ public class TaskExecuteStartCommand extends BaseCommand {
 
     private int dryRun;
 
+    private String savepoint;
+    private String checkpoint;
+
     public TaskExecuteStartCommand(String messageSenderAddress, String messageReceiverAddress, long messageSendTime) {
         super(messageSenderAddress, messageReceiverAddress, messageSendTime);
     }
