@@ -142,9 +142,10 @@ public class FlinkArgsUtils {
 
         FlinkDeployMode deployMode = Optional.ofNullable(flinkParameters.getDeployMode()).orElse(FlinkDeployMode.CLUSTER);
 
-        if (StringUtils.isBlank(flinkParameters.getSavepoint())) {
+        // 启动配置状态路径
+        if (StringUtils.isNotBlank(flinkParameters.getSavepoint())) {
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getSavepoint()));
-        } else if (StringUtils.isBlank(flinkParameters.getCheckpoint())) {
+        } else if (StringUtils.isNotBlank(flinkParameters.getCheckpoint())) {
             initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getCheckpoint()));
         }
         /**

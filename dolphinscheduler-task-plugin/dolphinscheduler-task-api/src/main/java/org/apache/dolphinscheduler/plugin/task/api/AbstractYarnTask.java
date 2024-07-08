@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.plugin.task.api;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.utils.FileUtils;
 import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
 import org.apache.dolphinscheduler.plugin.task.api.model.TaskResponse;
@@ -63,9 +64,14 @@ public abstract class AbstractYarnTask extends AbstractRemoteTask {
         try {
             // SHELL task exit code
             TaskResponse response = shellCommandExecutor.run(buildCommand());
-            setExitStatusCode(response.getExitStatusCode());
-            // set appIds
             setAppIds(String.join(TaskConstants.COMMA, getApplicationIds()));
+            // 如果没有获取到appId说明启动失败了
+            if (StringUtils.isBlank(getAppIds()) && response.getExitStatusCode() == 0) {
+                setExitStatusCode(-1);
+            } else {
+                setExitStatusCode(response.getExitStatusCode());
+            }
+            // set appIds
             setProcessId(response.getProcessId());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
