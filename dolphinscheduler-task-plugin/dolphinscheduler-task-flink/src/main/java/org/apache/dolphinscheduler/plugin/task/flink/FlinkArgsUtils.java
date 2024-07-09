@@ -144,9 +144,9 @@ public class FlinkArgsUtils {
 
         // 启动配置状态路径
         if (StringUtils.isNotBlank(flinkParameters.getSavepoint())) {
-            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getSavepoint()));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, String.format("'%s'", flinkParameters.getSavepoint())));
         } else if (StringUtils.isNotBlank(flinkParameters.getCheckpoint())) {
-            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, flinkParameters.getCheckpoint()));
+            initOptions.add(String.format(FlinkConstants.FLINK_FORMAT_RUN_SAVEPOINT, String.format("'%s'", flinkParameters.getCheckpoint())));
         }
         /**
          * Currently flink sql on yarn only supports yarn-per-job mode

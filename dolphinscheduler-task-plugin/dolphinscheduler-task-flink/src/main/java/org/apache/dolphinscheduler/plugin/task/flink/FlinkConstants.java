@@ -77,7 +77,7 @@ public class FlinkConstants {
     public static final String FLINK_FORMAT_TASKMANAGER_MEMORY_PROCESS_SIZE = "set taskmanager.memory.process.size=%s";
     public static final String FLINK_FORMAT_TASKMANAGER_NUMBEROFTASKSLOTS = "set taskmanager.numberOfTaskSlots=%d";
     public static final String FLINK_FORMAT_PARALLELISM_DEFAULT = "set parallelism.default=%d";
-    public static final String FLINK_FORMAT_RUN_SAVEPOINT = "execution.savepoint.path=%s";
+    public static final String FLINK_FORMAT_RUN_SAVEPOINT = "set execution.savepoint.path=%s";
 
     public static final String FLINK_FORMAT_EXECUTION_CHECKPOINTING_INTERVAL = "set execution.checkpointing.interval=%d";
     public static final String FLINK_FORMAT_EXECUTION_CHECKPOINTING_TOLERABLE_FAILED_CHECKPOINTS = "set execution.checkpointing.tolerable-failed-checkpoints=%d";

@@ -60,7 +60,7 @@ public class FileUtils {
                 FlinkArgsUtils.buildInitOptionsForSql(flinkParameters, taskExecutionContext),
                 FlinkConstants.FLINK_SQL_NEWLINE
         ).concat(FlinkConstants.FLINK_SQL_NEWLINE);
-        writeScriptFile(initScriptFilePath, initOptionsString + flinkParameters.getInitScript());
+        writeScriptFile(initScriptFilePath, initOptionsString + (flinkParameters.getInitScript() == null ? "" : flinkParameters.getInitScript()));
         writeScriptFile(scriptFilePath, flinkParameters.getRawScript());
     }
 

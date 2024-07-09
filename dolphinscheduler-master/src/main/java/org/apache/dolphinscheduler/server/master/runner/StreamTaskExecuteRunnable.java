@@ -368,7 +368,7 @@ public class StreamTaskExecuteRunnable implements Runnable {
             ObjectNode jsonNodes = JSONUtils.parseObject(taskParams);
             jsonNodes.put("savepoint", savepoint);
             jsonNodes.put("checkpoint", checkpoint);
-            taskExecutionContext.setTaskParams(jsonNodes.asText());
+            taskExecutionContext.setTaskParams(JSONUtils.toJsonString(jsonNodes));
         }
         return taskExecutionContext;
     }
