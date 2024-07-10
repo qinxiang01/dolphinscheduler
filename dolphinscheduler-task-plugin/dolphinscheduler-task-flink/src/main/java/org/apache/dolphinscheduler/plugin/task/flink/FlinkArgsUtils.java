@@ -227,10 +227,12 @@ public class FlinkArgsUtils {
             case CLUSTER:
                 if (FLINK_VERSION_AFTER_OR_EQUALS_1_12.equals(flinkVersion) || FLINK_VERSION_AFTER_OR_EQUALS_1_13.equals(flinkVersion)) {
                     args.add(FlinkConstants.FLINK_RUN);  //run
+                    args.add(FlinkConstants.FLINK_RUN_BACKEND);  //run
                     args.add(FlinkConstants.FLINK_EXECUTION_TARGET);  //-t
                     args.add(FlinkConstants.FLINK_YARN_PER_JOB);  //yarn-per-job
                 } else {
                     args.add(FlinkConstants.FLINK_RUN);  //run
+                    args.add(FlinkConstants.FLINK_RUN_BACKEND);  //run
                     args.add(FlinkConstants.FLINK_RUN_MODE);  //-m
                     args.add(FlinkConstants.FLINK_YARN_CLUSTER);  //yarn-cluster
                 }
@@ -310,6 +312,18 @@ public class FlinkArgsUtils {
         if (programType != null && programType != ProgramType.PYTHON && StringUtils.isNotEmpty(mainClass)) {
             args.add(FlinkConstants.FLINK_MAIN_CLASS);    //-c
             args.add(flinkParameters.getMainClass());          //main class
+        }
+        List<ResourceInfo> resourceList = flinkParameters.getResourceList();
+        if (resourceList != null && !resourceList.isEmpty()) {
+
+            for (ResourceInfo resourceInfo : resourceList) {
+
+                String res = resourceInfo.getRes();
+                if (res != null && res.endsWith(".jar")) {
+                    args.add(FlinkConstants.FLINK_CLASSPATH); // -C
+                    args.add("file://" + taskExecutionContext.getExecutePath() + File.separator + res); // -C
+                }
+            }
         }
 
         ResourceInfo mainJar = flinkParameters.getMainJar();
