@@ -40,13 +40,13 @@ public class SdhExtendController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "code", value = "PROCESS_DEFINITION_CODE", required = true, dataTypeClass = long.class, example = "123456789")
     })
-    @GetMapping(value = "/process/list")
+    @PostMapping(value = "/process/list")
     @ResponseStatus(HttpStatus.OK)
     @ApiException(QUERY_DETAIL_OF_PROCESS_DEFINITION_ERROR)
     @AccessLogAnnotation(ignoreRequestArgs = "loginUser")
     public Result queryProcessDefinitionByCodeAndVersion(@ApiIgnore @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
                                                          @ApiParam(name = "projectCode", value = "PROJECT_CODE", required = true) @PathVariable long projectCode,
-                                                         @RequestBody() List<ProcessListQueryVo> list) {
+                                                         @RequestBody List<ProcessListQueryVo> list) {
         Map<String, Object> result =
                 sdhExtendService.queryProcessDefinitionByCode(loginUser, projectCode, list);
         return returnDataList(result);
