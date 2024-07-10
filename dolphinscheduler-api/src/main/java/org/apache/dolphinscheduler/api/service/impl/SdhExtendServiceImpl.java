@@ -5,6 +5,7 @@ import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.service.ProjectService;
 import org.apache.dolphinscheduler.api.service.SdhExtendService;
 import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.Project;
 import org.apache.dolphinscheduler.dao.entity.User;
@@ -51,6 +52,7 @@ public class SdhExtendServiceImpl extends BaseServiceImpl implements SdhExtendSe
         }
 
         List<ProcessListDto> retList = sdhExtendMapper.selectInfoAndLastInstanceInfo(projectCode, list);
+        retList.forEach(info -> info.setDuration(DateUtils.format2Duration(info.getStartTime(), info.getEndTime())));
 
         result.put(Constants.DATA_LIST, retList);
         putMsg(result, Status.SUCCESS);
