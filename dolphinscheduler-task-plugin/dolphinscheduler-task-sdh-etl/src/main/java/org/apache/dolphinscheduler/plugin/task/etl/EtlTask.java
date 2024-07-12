@@ -121,7 +121,7 @@ public class EtlTask extends AbstractTask {
                             logger.info(" Run successfully");
                         } else {
                             setExitStatusCode(TaskConstants.EXIT_CODE_FAILURE);
-                            logger.error(" Run failed, status code: {}, exception information: {}", runStatus, statusJson.get("msg").asText());
+                            logger.error(" Run failed, status code: {}, exception information: {}", runStatus, statusJson.get("msg"));
                         }
                         break;
                     }
