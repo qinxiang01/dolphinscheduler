@@ -17,21 +17,16 @@
 
 package org.apache.dolphinscheduler.plugin.task.etl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.plugin.task.api.AbstractTask;
-import org.apache.dolphinscheduler.plugin.task.api.TaskCallBack;
-import org.apache.dolphinscheduler.plugin.task.api.TaskException;
-import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
+import org.apache.dolphinscheduler.plugin.task.api.*;
+import org.apache.dolphinscheduler.plugin.task.api.model.ApplicationInfo;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EtlTask extends AbstractTask {
 
@@ -49,6 +44,12 @@ public class EtlTask extends AbstractTask {
     private TaskExecutionContext taskExecutionContext;
 
     private boolean isStop = false;
+
+    private String jobId = "";
+
+
+    private boolean isCancel = false;
+
 
     /**
      * constructor
@@ -73,22 +74,148 @@ public class EtlTask extends AbstractTask {
     @Override
     public void handle(TaskCallBack taskCallBack) throws TaskException {
         //TODO  1, 做digest认证
-        //TODO  2,发送执行任务的请求，并根据响应信息获取实例Id：jobId
-        while (!isStop) {
+        try {
+            logger.info(" etl task start : {} ", taskExecutionContext.getTaskInstanceId());
+            Map<String, Object> runParams = buildRunParams();
+            logger.info(" etl task submit request: {} ", JSONUtils.toJsonString(runParams));
+            String retJsonStr = HttpClientUtil.sendPost(etlParams.getUrl() + EtlTaskApiEnum.START.getUri(), JSONUtils.toJsonString(runParams));
+            logger.info(" etl task submit response: {} ", retJsonStr);
 
+            if (retJsonStr == null) {
+                logger.error("etl task submit response is null");
+                throw new RuntimeException("Request service exception");
+            }
+            ObjectNode retJson = JSONUtils.parseObject(retJsonStr);
+            if (null == retJson) {
+                throw new RuntimeException("Request service exception");
+            } else {
+                Integer status = retJson.get("code").asInt();
+                String msg = retJson.get("msg").asText();
+                if (200 != status) {
+                    setExitStatusCode(TaskConstants.EXIT_CODE_FAILURE);
+                    logger.error(" Startup failed, status code: {}, failed information: {}", status, msg);
+                    return;
+                }
+                JsonNode dataNode = retJson.get("data");
+                String processInstanceId = dataNode.get("processInstanceId").asText();
+                logger.info("submit etl cluster success ,JobId:{}", processInstanceId);
+
+                this.jobId = processInstanceId;
+                taskCallBack.updateRemoteApplicationInfo(taskExecutionContext.getTaskInstanceId(), new ApplicationInfo(processInstanceId));
+                setAppIds(jobId);
+                // 轮询状态查询接口
+                while (!isStop) {
+                    JsonNode statusJson = getStatus();
+                    if (statusJson == null) {
+                        logger.error("etl task status is null, wait 3000ms retry");
+                        Thread.sleep(3000L);
+                        continue;
+                    }
+                    Integer runStatus = statusJson.get("state").asInt();
+                    /*-1未执行、0失败、1成功、2运行中、3已暂停、4已停止、5排队中*/
+                    if (-1 == runStatus || 2 == runStatus || 5 == runStatus) {
+                        Thread.sleep(8000L);
+                    } else {
+                        if (runStatus == 1) {
+                            setExitStatusCode(TaskConstants.EXIT_CODE_SUCCESS);
+                            logger.info(" Run successfully");
+                        } else {
+                            setExitStatusCode(TaskConstants.EXIT_CODE_FAILURE);
+                            logger.error(" Run failed, status code: {}, exception information: {}", runStatus, statusJson.get("msg").asText());
+                        }
+                        break;
+                    }
+                }
+                if (isCancel) {
+                    logger.info(" The current task is killed... ");
+                    Thread.sleep(50000);
+                }
+                printLog();
+            }
+
+
+        } catch (Exception e) {
+            logger.error("etl task failed ", e);
+            setExitStatusCode(TaskConstants.EXIT_CODE_FAILURE);
+            throw new TaskException("run java task error", e);
         }
-        //TODO  3，将实例ID发送给给master，存到任务实例表
-        //TODO  4、起一个异步线程，定时日志信息，确认日志信息每次是否是全量拉取
-        //TODO  5，轮询状态查询接口
-        //TODO  6，任务到达最终态，再获取一次日志接口。
-        //TODO  7, 任务结束
-
     }
+
+    private void printLog() throws IOException {
+        JsonNode logJson = getLog();
+        if (logJson == null) {
+            logger.info(" query etl cluster service log is null");
+        } else {
+            String message = logJson.get("message").asText();
+            logger.info(message);
+        }
+    }
+
+    private JsonNode getStatus() throws IOException {
+        String url = etlParams.getUrl() + EtlTaskApiEnum.STATUS.getUri();
+        String params = String.format("?tenantCode=%s&processInstanceId=%s", etlParams.getTenantId(), this.jobId);
+        String statusInfo = HttpClientUtil.sendGet(url + params);
+        if (null == statusInfo) {
+            return null;
+        }
+        ObjectNode statusNode = JSONUtils.parseObject(statusInfo);
+        int code = statusNode.get("code").asInt();
+        if (code != 200) {
+            return null;
+        }
+        return statusNode.get("data");
+    }
+
+    private JsonNode getLog() throws IOException {
+        String url = etlParams.getUrl() + EtlTaskApiEnum.LOG.getUri();
+        String params = String.format("?tenantCode=%s&processInstanceId=%s", etlParams.getTenantId(), this.jobId);
+        String statusInfo = HttpClientUtil.sendGet(url + params);
+        if (null == statusInfo) {
+            return null;
+        }
+        ObjectNode statusNode = JSONUtils.parseObject(statusInfo);
+        int code = statusNode.get("code").asInt();
+        if (code != 200) {
+            return null;
+        }
+        return statusNode.get("data");
+    }
+
 
     @Override
     public void cancel() throws TaskException {
-        // TODO 1，做认证，
-        // TODO 2,调用停止任务的接口停止任务
+        isCancel = true;
+        logger.info("cancel etl task ");
+        if (isStop) {
+            logger.info("task is already stop");
+            return;
+        }
+        isStop = true;
+        try {
+            String cancelResult = HttpClientUtil.sendPost(etlParams.getUrl() + EtlTaskApiEnum.CANCEL.getUri(), JSONUtils.toJsonString(buildCancelParams()));
+            logger.info("cancel etl cluster result :{}", cancelResult);
+        } catch (Exception e) {
+            logger.error("cancel etl task error：", e);
+            return;
+        }
+        logger.info("cancel etl task success! ");
+    }
+
+    private Map<String, Object> buildRunParams() {
+        Map<String, Object> runParams = new HashMap<String, Object>();
+        runParams.put("tenantCode", etlParams.getTenantId());
+        runParams.put("taskId", etlParams.getTaskId());
+        runParams.put("params", etlParams.getTaskParams());
+        runParams.put("rerun", etlParams.getRerun());
+        return runParams;
+    }
+
+    private Map<String, Object> buildCancelParams() {
+        Map<String, Object> cancelParams = new HashMap<String, Object>();
+        cancelParams.put("tenantCode", etlParams.getTenantId());
+        cancelParams.put("processInstanceId", jobId);
+        return cancelParams;
+
     }
 
 

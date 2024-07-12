@@ -3,7 +3,11 @@ package org.apache.dolphinscheduler.plugin.task.etl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
 
+import java.util.Map;
+
 public class EtlParams extends AbstractParameters {
+
+    private Long clusterId;
 
     private String url;
 
@@ -16,6 +20,10 @@ public class EtlParams extends AbstractParameters {
     private String projectId;
 
     private String taskId;
+
+    private Map<String,String> taskParams;
+
+    private int rerun;
 
 
     public String getUrl() {
@@ -64,6 +72,30 @@ public class EtlParams extends AbstractParameters {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Long getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(Long clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public Map<String, String> getTaskParams() {
+        return taskParams;
+    }
+
+    public void setTaskParams(Map<String, String> taskParams) {
+        this.taskParams = taskParams;
+    }
+
+    public int getRerun() {
+        return rerun;
+    }
+
+    public void setRerun(int rerun) {
+        this.rerun = rerun;
     }
 
     @Override

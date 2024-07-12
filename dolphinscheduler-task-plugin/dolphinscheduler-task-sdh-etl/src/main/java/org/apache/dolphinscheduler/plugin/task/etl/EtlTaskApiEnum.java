@@ -4,10 +4,10 @@ import org.apache.dolphinscheduler.common.enums.HttpMethod;
 
 public enum EtlTaskApiEnum {
 
-    STATUS("/status", HttpMethod.GET, ""),
-    START("/start", HttpMethod.POST, ""),
-    CANCEL("/cancel", HttpMethod.POST, ""),
-    LOG("/runlog", HttpMethod.GET, ""),
+    STATUS("/etl/task/status", HttpMethod.GET, ""),
+    START("/etl/task/start", HttpMethod.POST, ""),
+    CANCEL("/etl/task/cancel", HttpMethod.POST, ""),
+    LOG("/etl/task/log", HttpMethod.GET, ""),
     ;
     private String uri;
 
