@@ -19,11 +19,14 @@ package org.apache.dolphinscheduler.plugin.task.spark;
 
 import static org.apache.dolphinscheduler.plugin.task.api.TaskConstants.RWXR_XR_X;
 
+import lombok.NonNull;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractYarnTask;
+import org.apache.dolphinscheduler.plugin.task.api.TaskConstants;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
+import org.apache.dolphinscheduler.plugin.task.api.model.TaskResponse;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
 import org.apache.dolphinscheduler.plugin.task.api.parser.ParamUtils;
 import org.apache.dolphinscheduler.plugin.task.api.parser.ParameterUtils;
@@ -31,19 +34,24 @@ import org.apache.dolphinscheduler.plugin.task.api.utils.ArgsUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SparkTask extends AbstractYarnTask {
 
@@ -56,6 +64,8 @@ public class SparkTask extends AbstractYarnTask {
      * taskExecutionContext
      */
     private TaskExecutionContext taskExecutionContext;
+
+    private static final Pattern SPARK_ON_YARN_FINISHED = Pattern.compile(TaskConstants.SPARK_FINISHED_REGEX);
 
     public SparkTask(TaskExecutionContext taskExecutionContext) {
         super(taskExecutionContext);
@@ -126,6 +136,28 @@ public class SparkTask extends AbstractYarnTask {
         logger.info("spark task command: {}", command);
 
         return command;
+    }
+
+    @Override
+    public boolean checkOutResult(TaskResponse response) {
+        return true;
+    }
+
+    public boolean checkResult(@NonNull String logPath, Logger logger) {
+        File logFile = new File(logPath);
+        if (!logFile.exists() || !logFile.isFile()) {
+            return false;
+        }
+        try (Stream<String> stream = Files.lines(Paths.get(logPath))) {
+            List<String> collect = stream.filter(line -> {
+                Matcher matcher = SPARK_ON_YARN_FINISHED.matcher(line);
+                return matcher.find();
+            }).collect(Collectors.toList());
+            return !ObjectUtils.isEmpty(collect);
+        } catch (IOException e) {
+            logger.error("Get taskJobId from log file error, logPath: {}", logPath, e);
+            return false;
+        }
     }
 
     /**

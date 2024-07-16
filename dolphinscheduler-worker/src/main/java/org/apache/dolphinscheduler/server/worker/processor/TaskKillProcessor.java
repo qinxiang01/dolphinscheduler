@@ -183,6 +183,8 @@ public class TaskKillProcessor implements NettyRequestProcessor {
             return;
         }
         try {
+            Thread.currentThread().setName(workerTaskExecuteRunnable.getTaskExecutionContext().getTaskLogName());
+            LoggerUtils.setWorkflowAndTaskInstanceIDMDC(workerTaskExecuteRunnable.getTaskExecutionContext().getProcessInstanceId(), taskInstanceId);
             task.cancel();
         } catch (Exception e) {
             logger.error("kill task error", e);

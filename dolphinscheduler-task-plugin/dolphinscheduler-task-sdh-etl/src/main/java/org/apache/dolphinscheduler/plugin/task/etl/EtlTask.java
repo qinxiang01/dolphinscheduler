@@ -140,6 +140,25 @@ public class EtlTask extends AbstractTask {
             throw new TaskException("run java task error", e);
         }
     }
+    
+    @Override
+    public void cancel() throws TaskException {
+        isCancel = true;
+        logger.info("cancel etl task ");
+        if (isStop) {
+            logger.info("task is already stop");
+            return;
+        }
+        isStop = true;
+        try {
+            String cancelResult = HttpClientUtil.sendPost(etlParams.getUrl() + EtlTaskApiEnum.CANCEL.getUri(), JSONUtils.toJsonString(buildCancelParams()));
+            logger.info("cancel etl cluster result :{}", cancelResult);
+        } catch (Exception e) {
+            logger.error("cancel etl task error：", e);
+            return;
+        }
+        logger.info("cancel etl task success! ");
+    }
 
     private void printLog() throws IOException {
         JsonNode logJson = getLog();
@@ -179,26 +198,6 @@ public class EtlTask extends AbstractTask {
             return null;
         }
         return statusNode.get("data");
-    }
-
-
-    @Override
-    public void cancel() throws TaskException {
-        isCancel = true;
-        logger.info("cancel etl task ");
-        if (isStop) {
-            logger.info("task is already stop");
-            return;
-        }
-        isStop = true;
-        try {
-            String cancelResult = HttpClientUtil.sendPost(etlParams.getUrl() + EtlTaskApiEnum.CANCEL.getUri(), JSONUtils.toJsonString(buildCancelParams()));
-            logger.info("cancel etl cluster result :{}", cancelResult);
-        } catch (Exception e) {
-            logger.error("cancel etl task error：", e);
-            return;
-        }
-        logger.info("cancel etl task success! ");
     }
 
     private Map<String, Object> buildRunParams() {

@@ -31,6 +31,8 @@ public class TaskConstants {
 
     public static final String FLINK_APPLICATION_REGEX = "Job ID: \\w+";
 
+    public static final String SPARK_FINISHED_REGEX = "state: FINISHED";
+
     public static final String SETVALUE_REGEX = "[\\$#]\\{setValue\\(([^)]*)\\)}";
 
     /**

@@ -65,11 +65,11 @@ public abstract class AbstractYarnTask extends AbstractRemoteTask {
             // SHELL task exit code
             TaskResponse response = shellCommandExecutor.run(buildCommand());
             setAppIds(String.join(TaskConstants.COMMA, getApplicationIds()));
-            // 如果没有获取到appId说明启动失败了
-            if (StringUtils.isBlank(getAppIds()) && response.getExitStatusCode() == 0) {
-                setExitStatusCode(-1);
-            } else {
+            // 不同的组件对于提交完之后的判断逻辑有所差异，flink 和 flink stream需要判断有没有返回appId和JobId,spark 判断
+            if (checkOutResult(response)) {
                 setExitStatusCode(response.getExitStatusCode());
+            } else {
+                setExitStatusCode(-1);
             }
             // set appIds
             setProcessId(response.getProcessId());
@@ -83,6 +83,10 @@ public abstract class AbstractYarnTask extends AbstractRemoteTask {
             exitStatusCode = -1;
             throw new TaskException("Execute task failed", e);
         }
+    }
+
+    public boolean checkOutResult(TaskResponse response) {
+        return true;
     }
 
     // todo

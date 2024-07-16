@@ -18,18 +18,19 @@
 package org.apache.dolphinscheduler.plugin.task.flink;
 
 import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.task.api.AbstractYarnTask;
 import org.apache.dolphinscheduler.plugin.task.api.TaskConstants;
 import org.apache.dolphinscheduler.plugin.task.api.TaskException;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.model.ResourceInfo;
+import org.apache.dolphinscheduler.plugin.task.api.model.TaskResponse;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
 import org.apache.dolphinscheduler.plugin.task.api.parser.ParameterUtils;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
 import org.slf4j.Logger;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,6 +105,16 @@ public class FlinkTask extends AbstractYarnTask {
             appIds = appIds + "==" +  String.join(TaskConstants.COMMA, taskJobId);
         }
         super.appIds = appIds;
+    }
+
+    @Override
+    public boolean checkOutResult(TaskResponse response) {
+        // 如果没有获取到appId说明启动失败了
+        if (StringUtils.isBlank(getAppIds()) && response.getExitStatusCode() == 0) {
+           return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
